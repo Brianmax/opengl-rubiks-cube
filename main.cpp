@@ -118,7 +118,12 @@ struct Cube
 
                 glBindVertexArray(camadasCube[i].arr[e].VAO);
 
-                glDrawArrays(GL_TRIANGLES, 0, 36);
+                for(int m = 0; m < 6; m++)
+                {
+                    glUniform4f(colLoc, 1.0f, 0.0f, 0.0f, 1.0f);
+                    glDrawArrays(GL_TRIANGLES, 13, 18);
+                }
+                //glDrawArrays(GL_TRIANGLES, 0, 36);
             }
         }
     }

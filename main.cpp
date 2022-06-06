@@ -112,11 +112,14 @@ struct Cube
 
                 glUniformMatrix4fv(currCubitoModelLoc, 1, GL_FALSE, &currCubitoModel[0][0]);
                 glBindVertexArray(camadasCube[i].arr[e].VAO);
+
                 for (int k = 0; k <= 30; k+=6)
                 {
                     int t = k / 6;
-                    glUniform4f(colLoc, cubeColorsFront[t][0], cubeColorsFront[t][1],cubeColorsFront[t][2], cubeColorsFront[t][3]);
-                    glDrawArrays(GL_TRIANGLES, k, k + 6);
+                    glUniform4f(colLoc, cubeColorsFront[t][0], cubeColorsFront[t][1],cubeColorsFront[t][2],1.0);
+                    glDrawArrays(GL_TRIANGLES, k, 6);
+                    glUniform4f(colLoc, 0, 0, 0, 1.0);
+                    glDrawArrays(GL_LINE_STRIP, k, 6);
                 }
             }
         }
@@ -209,7 +212,8 @@ int main(){
     glDeleteShader(fragmentShader);
 
     glEnable(GL_DEPTH_TEST);
-
+    glPointSize(8);
+    glLineWidth(10);
     while (!glfwWindowShouldClose(window)) {
 
         processInput(window);

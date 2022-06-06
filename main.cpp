@@ -6,7 +6,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
 #include <array>
-#include "vertex.cpp"
+#include "vertex.h"
 using namespace std;
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -85,9 +85,6 @@ struct Cube
         shaderP = shaderProgram;
         camadasCube.resize(3);
     }
-    vector<vector<glm::vec4>> cubeColorsFront;
-    vector<vector<glm::vec4>> cubeColorsMedium;
-    vector<vector<glm::vec4>> cubeColorsBack;
 
     void draw()
     {
@@ -114,16 +111,13 @@ struct Cube
                 unsigned int colLoc = glGetUniformLocation(shaderP, "ourColor");
 
                 glUniformMatrix4fv(currCubitoModelLoc, 1, GL_FALSE, &currCubitoModel[0][0]);
-                glUniform4f(colLoc, 1.0f, 0.0f, 0.0f, 1.0f);
-
                 glBindVertexArray(camadasCube[i].arr[e].VAO);
-
-                for(int m = 0; m < 6; m++)
+                for (int k = 0; k <= 30; k+=6)
                 {
-                    glUniform4f(colLoc, 1.0f, 0.0f, 0.0f, 1.0f);
-                    glDrawArrays(GL_TRIANGLES, 13, 18);
+                    int t = k / 6;
+                    glUniform4f(colLoc, cubeColorsFront[t][0], cubeColorsFront[t][1],cubeColorsFront[t][2], cubeColorsFront[t][3]);
+                    glDrawArrays(GL_TRIANGLES, k, k + 6);
                 }
-                //glDrawArrays(GL_TRIANGLES, 0, 36);
             }
         }
     }

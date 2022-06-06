@@ -2,4 +2,3 @@ CMakeLists.txt
 glad.c
 cmake-build-debug/
 .idea/
-

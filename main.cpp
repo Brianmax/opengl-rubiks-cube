@@ -6,7 +6,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
 #include <array>
-#include "vertex.cpp"
+#include "vertex.h"
 using namespace std;
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -54,8 +54,10 @@ glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);
 int len = 3;
 struct cubito{
     unsigned int VBO, VAO;
-    cubito()
+    vector<glm::vec3 > colors;
+    cubito(vector<glm::vec3> c)
     {
+        colors = c;
         glGenBuffers(1, &VBO);
         glGenVertexArrays(1, &VAO);
         glBindVertexArray(VAO);
@@ -69,11 +71,11 @@ struct cubito{
 };
 struct camada{
     vector<cubito> arr;
-    camada()
+    camada(vvv3 camadaColors)
     {
         for(int i = 0; i < 9; i++)
         {
-            arr.emplace_back(cubito());
+            arr.emplace_back(cubito(camadaColors[i]));
         }
     }
 };
@@ -83,11 +85,13 @@ struct Cube
     vector<camada> camadasCube;
     Cube(unsigned int shaderProgram){
         shaderP = shaderProgram;
-        camadasCube.resize(3);
+        camada CamadaFront(coloresFront);
+        camada CamadaMiddle(coloresMiddle);
+        camada CamadaBack(coloresBack);
+        camadasCube.push_back(CamadaFront);
+        camadasCube.push_back(CamadaMiddle);
+        camadasCube.push_back(CamadaBack);
     }
-    vector<vector<glm::vec4>> cubeColorsFront;
-    vector<vector<glm::vec4>> cubeColorsMedium;
-    vector<vector<glm::vec4>> cubeColorsBack;
 
     void draw()
     {
@@ -103,7 +107,6 @@ struct Cube
 
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
         glUniformMatrix4fv(projectionLoc,1, GL_FALSE, &projection[0][0]);
-
         for(int i = 0; i < 3; i++)
         {
             for(int e = 0; e < 9; e++)
@@ -114,11 +117,17 @@ struct Cube
                 unsigned int colLoc = glGetUniformLocation(shaderP, "ourColor");
 
                 glUniformMatrix4fv(currCubitoModelLoc, 1, GL_FALSE, &currCubitoModel[0][0]);
-                glUniform4f(colLoc, 1.0f, 0.0f, 0.0f, 1.0f);
-
                 glBindVertexArray(camadasCube[i].arr[e].VAO);
 
-                glDrawArrays(GL_TRIANGLES, 0, 36);
+                for (int k = 0; k <= 30; k+=6)
+                {
+                    int t = k / 6;
+                    glm::vec3 CurrColor = camadasCube[i].arr[e].colors[t];
+                    glUniform4f(colLoc, CurrColor[0], CurrColor[1],CurrColor[2],1.0);
+                    glDrawArrays(GL_TRIANGLES, k, 6);
+                    glUniform4f(colLoc, 0, 0, 0, 1.0);
+                    glDrawArrays(GL_LINE_STRIP, k, 6);
+                }
             }
         }
     }
@@ -210,11 +219,13 @@ int main(){
     glDeleteShader(fragmentShader);
 
     glEnable(GL_DEPTH_TEST);
-
+    glPointSize(8);
+    glLineWidth(10);
+    Cube cube = Cube(shaderProgram);
     while (!glfwWindowShouldClose(window)) {
 
         processInput(window);
-        Cube cube = Cube(shaderProgram);
+
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 

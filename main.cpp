@@ -54,8 +54,10 @@ glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);
 int len = 3;
 struct cubito{
     unsigned int VBO, VAO;
-    cubito()
+    vector<glm::vec3 > colors;
+    cubito(vector<glm::vec3> c)
     {
+        colors = c;
         glGenBuffers(1, &VBO);
         glGenVertexArrays(1, &VAO);
         glBindVertexArray(VAO);
@@ -69,11 +71,11 @@ struct cubito{
 };
 struct camada{
     vector<cubito> arr;
-    camada()
+    camada(vvv3 camadaColors)
     {
         for(int i = 0; i < 9; i++)
         {
-            arr.emplace_back(cubito());
+            arr.emplace_back(cubito(camadaColors[i]));
         }
     }
 };
@@ -83,7 +85,12 @@ struct Cube
     vector<camada> camadasCube;
     Cube(unsigned int shaderProgram){
         shaderP = shaderProgram;
-        camadasCube.resize(3);
+        camada CamadaFront(coloresFront);
+        camada CamadaMiddle(coloresMiddle);
+        camada CamadaBack(coloresBack);
+        camadasCube.push_back(CamadaFront);
+        camadasCube.push_back(CamadaMiddle);
+        camadasCube.push_back(CamadaBack);
     }
 
     void draw()
@@ -100,7 +107,6 @@ struct Cube
 
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
         glUniformMatrix4fv(projectionLoc,1, GL_FALSE, &projection[0][0]);
-
         for(int i = 0; i < 3; i++)
         {
             for(int e = 0; e < 9; e++)
@@ -116,7 +122,8 @@ struct Cube
                 for (int k = 0; k <= 30; k+=6)
                 {
                     int t = k / 6;
-                    glUniform4f(colLoc, cubeColorsFront[t][0], cubeColorsFront[t][1],cubeColorsFront[t][2],1.0);
+                    glm::vec3 CurrColor = camadasCube[i].arr[e].colors[t];
+                    glUniform4f(colLoc, CurrColor[0], CurrColor[1],CurrColor[2],1.0);
                     glDrawArrays(GL_TRIANGLES, k, 6);
                     glUniform4f(colLoc, 0, 0, 0, 1.0);
                     glDrawArrays(GL_LINE_STRIP, k, 6);
@@ -214,10 +221,11 @@ int main(){
     glEnable(GL_DEPTH_TEST);
     glPointSize(8);
     glLineWidth(10);
+    Cube cube = Cube(shaderProgram);
     while (!glfwWindowShouldClose(window)) {
 
         processInput(window);
-        Cube cube = Cube(shaderProgram);
+
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 

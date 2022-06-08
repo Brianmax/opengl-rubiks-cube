@@ -12,42 +12,42 @@
 #define black glm::vec3(0.0,0.0,0.0)
 
 float cube_vertices[] = {
-        // up
+        // back
         -0.2f, -0.2f, -0.2f,
         0.2f, -0.2f, -0.2f,
         0.2f,  0.2f, -0.2f,
         0.2f,  0.2f, -0.2f,
         -0.2f,  0.2f, -0.2f,
         -0.2f, -0.2f, -0.2f,
-
+        //front
         -0.2f, -0.2f,  0.2f,
         0.2f, -0.2f,  0.2f,
         0.2f,  0.2f,  0.2f,
         0.2f,  0.2f,  0.2f,
         -0.2f,  0.2f,  0.2f,
         -0.2f, -0.2f,  0.2f,
-
+        //left
         -0.2f,  0.2f,  0.2f,
         -0.2f,  0.2f, -0.2f,
         -0.2f, -0.2f, -0.2f,
         -0.2f, -0.2f, -0.2f,
         -0.2f, -0.2f,  0.2f,
         -0.2f,  0.2f,  0.2f,
-
+        //right
         0.2f,  0.2f,  0.2f,
         0.2f,  0.2f, -0.2f,
         0.2f, -0.2f, -0.2f,
         0.2f, -0.2f, -0.2f,
         0.2f, -0.2f,  0.2f,
         0.2f,  0.2f,  0.2f,
-
+        //down
         -0.2f, -0.2f, -0.2f,
         0.2f, -0.2f, -0.2f,
         0.2f, -0.2f,  0.2f,
         0.2f, -0.2f,  0.2f,
         -0.2f, -0.2f,  0.2f,
         -0.2f, -0.2f, -0.2f,
-
+        //up
         -0.2f,  0.2f, -0.2f,
         0.2f,  0.2f, -0.2f,
         0.2f,  0.2f,  0.2f,
@@ -56,87 +56,95 @@ float cube_vertices[] = {
         -0.2f,  0.2f, -0.2f
 };
 std::vector<glm::vec3> cubeColorsFront = {
-    white, red, green, blue, orange, yellow
+    yellow, white, green, blue, red, orange
 };
-std::vector<glm::vec3> cubePositionsFront = {
-        glm::vec3(-0.8f, -0.8f, 0.0f),
-        glm::vec3(-0.4f, -0.8f, 0.0f),
-        glm::vec3(0.0f, -0.8f, 0.0f),
+typedef std::vector<glm::vec3> vv3;
+typedef std::vector<vv3> vvv3;
+std::vector<std::vector<glm::vec3 > > coloresFront {
+    //  B       F       L      R     D     U
+    vv3{black, white, green, black, red, black},
+    vv3{black, white, black, black, red, black},
+    vv3{black, white, black, blue, red, black},
 
-        glm::vec3(-0.8f, -0.4f, 0.0f),
-        glm::vec3(-0.4f, -0.4f, 0.0f),
-        glm::vec3(0.0f, -0.4f, 0.0f),
+    vv3{black, white, green, black, black, black},
+    vv3{black, white, black, black, black, black},
+    vv3{black, white, black, blue, black, black},
 
-        glm::vec3(-0.8f, 0.0f, 0.0f),
-        glm::vec3(-0.4f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 0.0f, 0.0f),
+    vv3{black, white, green, black, black, orange},
+    vv3{black, white, black, black, black, orange},
+    vv3{black, white, black, blue, black, orange},
 };
-std::vector<glm::vec3> cubePositionsMiddle = {
-        glm::vec3(-0.8f, -0.8f, -0.4f),
-        glm::vec3(-0.4f, -0.8f, -0.4f),
-        glm::vec3(0.0f, -0.8f, -0.4f),
 
-        glm::vec3(-0.8f, -0.4f, -0.4f),
-        glm::vec3(-0.4f, -0.4f, -0.4f),
-        glm::vec3(0.0f, -0.4f, -0.4f),
 
-        glm::vec3(-0.8f, 0.0f, -0.4f),
-        glm::vec3(-0.4f, 0.0f, -0.4f),
-        glm::vec3(0.0f, 0.0f, -0.4f),
+std::vector<std::vector<glm::vec3 > > coloresMiddle {
+        //  B       F       L      R     D     U
+        vv3{black, black, green, black, red, black},
+        vv3{black, black, black, black, red, black},
+        vv3{black, black, black, blue, red, black},
+
+        vv3{black, black, green, black, black, black},
+        vv3{black, black, black, black, black, black},
+        vv3{black, black, black, blue, black, black},
+
+        vv3{black, black, green, black, black, orange},
+        vv3{black, black, black, black, black, orange},
+        vv3{black, black, black, blue, black, orange}
 };
-std::vector<glm::vec3> cubePositionsBack{
-        glm::vec3(-0.8f,  -0.8f, -0.8f),
-        glm::vec3(-0.4f,  -0.8f, -0.8f),
-        glm::vec3(0.0f,  -0.8f, -0.8f),
+std::vector<std::vector<glm::vec3 > > coloresBack {
+        //  B       F       L      R      D      U
+        vv3{yellow, black, green, black, red, black},
+        vv3{yellow, black, black, black, red, black},
+        vv3{yellow, black, black, blue, red, black},
 
-        glm::vec3(-0.8f,  -0.4f, -0.8f),
-        glm::vec3(-0.4f,  -0.4f, -0.8f),
-        glm::vec3(0.0f,  -0.4f, -0.8f),
+        vv3{yellow, black, green, black, black, black},
+        vv3{yellow, black, black, black, black, black},
+        vv3{yellow, black, black, blue, black, black},
 
-        glm::vec3(-0.8f,  0.0f, -0.8f),
-        glm::vec3(-0.4f,  0.0f, -0.8f),
-        glm::vec3(0.0f,  0.0f, -0.8f)
+        vv3{yellow, black, green, black, black, orange},
+        vv3{yellow, black, black, black, black, orange},
+        vv3{yellow, black, black, blue, black, orange}
 };
+
 
 //CUBOS SEPARADOS
-//std::vector<glm::vec3> cubePositionsFront = {
-//        glm::vec3(-0.8f, -0.8f, 0.0f),
-//        glm::vec3(-0.4f, -0.8f, 0.0f),
-//        glm::vec3(0.0f, -0.8f, 0.0f),
-//
-//        glm::vec3(-0.8f, -0.3f, 0.0f),
-//        glm::vec3(-0.3f, -0.3f, 0.0f),
-//        glm::vec3(0.2f, -0.3f, 0.0f),
-//
-//        glm::vec3(-0.8f, 0.2f, 0.0f),
-//        glm::vec3(-0.3f, 0.2f, 0.0f),
-//        glm::vec3(0.2f, 0.2f, 0.0f),
-//};
-//std::vector<glm::vec3> cubePositionsMiddle = {
-//        glm::vec3(-0.8f, -0.8f, -0.5f),
-//        glm::vec3(-0.3f, -0.8f, -0.5f),
-//        glm::vec3(0.2f, -0.8f, -0.5f),
-//
-//        glm::vec3(-0.8f, -0.3f, -0.5f),
-//        glm::vec3(-0.3f, -0.3f, -0.5f),
-//        glm::vec3(0.2f, -0.3f, -0.5f),
-//
-//        glm::vec3(-0.8f, 0.2f, -0.5f),
-//        glm::vec3(-0.3f, 0.2f, -0.5f),
-//        glm::vec3(0.2f, 0.2f, -0.5f),
-//};
-//std::vector<glm::vec3> cubePositionsBack{
-//        glm::vec3(-0.8f,  -0.8f, -1.0f),
-//        glm::vec3(-0.3f,  -0.8f, -1.0f),
-//        glm::vec3(0.2f,  -0.8f, -1.0f),
-//
-//        glm::vec3(-0.8f,  -0.3f, -1.0f),
-//        glm::vec3(-0.3f,  -0.3f, -1.0f),
-//        glm::vec3(0.2f,  -0.3f, -1.0f),
-//
-//        glm::vec3(-0.8f,  0.2f, -1.0f),
-//        glm::vec3(-0.3f,  0.2f, -1.0f),
-//        glm::vec3(0.2f,  0.2f, -1.0f)
-//};
+std::vector<glm::vec3> cubePositionsFront = {
+        glm::vec3(-0.8f, -0.8f, 0.0f),
+        glm::vec3(-0.3f, -0.8f, 0.0f),
+        glm::vec3(0.2f, -0.8f, 0.0f),
+
+        glm::vec3(-0.8f, -0.3f, 0.0f),
+        glm::vec3(-0.3f, -0.3f, 0.0f),
+        glm::vec3(0.2f, -0.3f, 0.0f),
+
+        glm::vec3(-0.8f, 0.2f, 0.0f),
+        glm::vec3(-0.3f, 0.2f, 0.0f),
+        glm::vec3(0.2f, 0.2f, 0.0f),
+};
+std::vector<glm::vec3> cubePositionsMiddle = {
+        glm::vec3(-0.8f, -0.8f, -0.5f),
+        glm::vec3(-0.3f, -0.8f, -0.5f),
+        glm::vec3(0.2f, -0.8f, -0.5f),
+
+        glm::vec3(-0.8f, -0.3f, -0.5f),
+        glm::vec3(-0.3f, -0.3f, -0.5f),
+        glm::vec3(0.2f, -0.3f, -0.5f),
+
+        glm::vec3(-0.8f, 0.2f, -0.5f),
+        glm::vec3(-0.3f, 0.2f, -0.5f),
+        glm::vec3(0.2f, 0.2f, -0.5f),
+};
+std::vector<glm::vec3> cubePositionsBack{
+        glm::vec3(-0.8f,  -0.8f, -1.0f),
+        glm::vec3(-0.3f,  -0.8f, -1.0f),
+        glm::vec3(0.2f,  -0.8f, -1.0f),
+
+        glm::vec3(-0.8f,  -0.3f, -1.0f),
+        glm::vec3(-0.3f,  -0.3f, -1.0f),
+        glm::vec3(0.2f,  -0.3f, -1.0f),
+
+        glm::vec3(-0.8f,  0.2f, -1.0f),
+        glm::vec3(-0.3f,  0.2f, -1.0f),
+        glm::vec3(0.2f,  0.2f, -1.0f)
+};
 
 std::vector<std::vector<glm::vec3>> positions = {cubePositionsFront, cubePositionsMiddle, cubePositionsBack};

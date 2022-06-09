@@ -106,19 +106,20 @@ std::vector<std::vector<glm::vec3 > > coloresBack {
 };
 
 
+
 //CUBOS SEPARADOS
 std::vector<glm::vec3> cubePositionsFront = {
-        glm::vec3(-0.8f, -0.8f, 0.0f),
-        glm::vec3(-0.3f, -0.8f, 0.0f),
-        glm::vec3(0.2f, -0.8f, 0.0f),
+        glm::vec3(-0.8f, -0.8f, 0.0f), //C 0
+        glm::vec3(-0.3f, -0.8f, 0.0f), //E 1
+        glm::vec3(0.2f, -0.8f, 0.0f), //C 2
 
-        glm::vec3(-0.8f, -0.3f, 0.0f),
-        glm::vec3(-0.3f, -0.3f, 0.0f),
-        glm::vec3(0.2f, -0.3f, 0.0f),
+        glm::vec3(-0.8f, -0.3f, 0.0f), //E 3
+        glm::vec3(-0.3f, -0.3f, 0.0f), //M 4
+        glm::vec3(0.2f, -0.3f, 0.0f), //E 5
 
-        glm::vec3(-0.8f, 0.2f, 0.0f),
-        glm::vec3(-0.3f, 0.2f, 0.0f),
-        glm::vec3(0.2f, 0.2f, 0.0f),
+        glm::vec3(-0.8f, 0.2f, 0.0f), //C 6
+        glm::vec3(-0.3f, 0.2f, 0.0f), //E 7
+        glm::vec3(0.2f, 0.2f, 0.0f), //C 8
 };
 std::vector<glm::vec3> cubePositionsMiddle = {
         glm::vec3(-0.8f, -0.8f, -0.5f),

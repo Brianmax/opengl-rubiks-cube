@@ -58,8 +58,7 @@ glm::vec3 computeCircumPoints(float r, double angle, glm::vec3 origin){
 
     float initX = (origin.x) + r * cos(glm::radians(angle));
     float initY = (origin.y) + r * sin(glm::radians(angle));
-    //cout <<"COMPUTE CIRCUM POINTS: "<< initX << ", " << initY << '\n';
-    return glm::vec3(initX, initY, 0);
+    return glm::vec3(initX, initY, origin.z);
 }
 
 int len = 3;
@@ -129,7 +128,6 @@ struct Cube
     }
     void draw()
     {
-        // Para todos los cubitos
         glm::mat4 projection = glm::mat4(1.0f);
         projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
@@ -147,16 +145,9 @@ struct Cube
             {
                 glm::mat4 currCubitoModel = glm::mat4(1.0f);
                 currCubitoModel = glm::translate(currCubitoModel, camadasCube[i].arr[e].getPosition());
-                //glm::vec3* rotation = &camadasCube[i].arr[e].rotation;
-                //currCubitoModel = glm::translate(currCubitoModel, *rotation);
-                
+
                 unsigned int currCubitoModelLoc = glGetUniformLocation(shaderP, "model");
                 unsigned int colLoc = glGetUniformLocation(shaderP, "ourColor");
-
-
-                    
-                //cout << rotation->x <<" "<< rotation->y <<" "<< rotation->z <<" "<< '\n';
-
                 currCubitoModel = glm::rotate(currCubitoModel, camadasCube[i].arr[e].angle/57, glm::vec3(0, 0, 1));
                 glUniformMatrix4fv(currCubitoModelLoc, 1, GL_FALSE, &currCubitoModel[0][0]);
                 glBindVertexArray(camadasCube[i].arr[e].VAO);
@@ -173,16 +164,9 @@ struct Cube
             }
         }
     }
-    void fRotation(double angle) {
-        camada* camadaFront = &camadasCube[0];
+    void fRotation(double angle, int axis) {
+        camada* camadaFront = &camadasCube[axis];
         glm::vec3 origin = camadaFront->arr[4].position;
-
-        glm::vec3 cornerRotation = computeCircumPoints(radiusCorner, angle, origin);
-        //cout << "CORNER -------------------------------------" << '\n';
-        glm::vec3 edgeRotation = computeCircumPoints(radiusEdge, angle, origin);
-        //cout << "EDGE -------------------------------------" << '\n';
-        glm::vec3 centerRotation = computeCircumPoints(radiusCenter, angle, origin);
-        //cout << "CENTER -------------------------------------" << '\n';
 
         camadaFront->arr[0].setRotation(computeCircumPoints(radiusCorner, angle + 225, origin),angle);
         camadaFront->arr[2].setRotation(computeCircumPoints(radiusCorner, angle + 315, origin),angle);
@@ -194,36 +178,62 @@ struct Cube
         camadaFront->arr[1].setRotation(computeCircumPoints(radiusEdge, angle + 270, origin),angle);
         camadaFront->arr[3].setRotation(computeCircumPoints(radiusEdge, angle + 180, origin),angle);
         camadaFront->arr[5].setRotation(computeCircumPoints(radiusEdge, angle , origin),angle);
-        camadaFront->arr[7].setRotation(computeCircumPoints(radiusEdge, angle + 90, origin),angle);
-
-
-        //for (int i = 0; i < 9; i++)
-        //{
-        //    glm::vec3* rotation = &camadaFront->arr[i].rotation;
-        //    //CORNERS
-        //    if (i == 0 || i == 2 || i == 6 || i == 8)
-        //    {
-        //        *rotation = computeCircumPoints(radiusCorner, angle, origin);
-        //    }
-        //    // EDGES
-        //    else if (i % 2 != 0)
-        //    {
-        //        *rotation = edgeRotation;
-        //    }
-        //    // CENTER
-        //    else {
-        //        *rotation =  centerRotation;
-        //    }
-        //}
+        camadaFront->arr[7].setRotation(computeCircumPoints(radiusEdge, angle + 90, origin), angle);
     }
 };
 
-double angleLimit = 90;
-double increment = 1;
+struct CubeController {
+    Cube* cube;
+    vector<camada> *camadasCube;
+    CubeController() {
+        cube = nullptr;
+        camadasCube = nullptr;
+    }
+    void setCubo(Cube& _cube)
+    {
+        camadasCube = &_cube.camadasCube;
+        cube = &_cube;
+    }
+    void camadaRotation(double angle, int axis) {
+        camada * camadaFront = &cube->camadasCube[axis];
+        glm::vec3 origin = camadaFront->arr[4].position;
+
+        camadaFront->arr[0].setRotation(computeCircumPoints(radiusCorner, angle + 225, origin), angle);
+        camadaFront->arr[2].setRotation(computeCircumPoints(radiusCorner, angle + 315, origin), angle);
+        camadaFront->arr[6].setRotation(computeCircumPoints(radiusCorner, angle + 495, origin), angle);
+        camadaFront->arr[8].setRotation(computeCircumPoints(radiusCorner, angle + 405, origin), angle);
+
+        camadaFront->arr[4].setRotation(computeCircumPoints(radiusCenter, angle, origin), angle);
+
+        camadaFront->arr[1].setRotation(computeCircumPoints(radiusEdge, angle + 270, origin), angle);
+        camadaFront->arr[3].setRotation(computeCircumPoints(radiusEdge, angle + 180, origin), angle);
+        camadaFront->arr[5].setRotation(computeCircumPoints(radiusEdge, angle, origin), angle);
+        camadaFront->arr[7].setRotation(computeCircumPoints(radiusEdge, angle + 90, origin), angle);
+    }
+    void fRotation(double& angle)
+    {
+        camadaRotation(angle, 0);
+    }
+    void MRotation(double& angle)
+    {
+        camadaRotation(angle, 1);
+    }
+    void BRotation(double& angle)
+    {
+        camadaRotation(angle, 2);
+    }
+
+    
+};
+double angle = 0;
+double angleLimit = 90.0f;
+double increment = 0.3;
 void handleAngle(double& angle)
 {
-    angle += angle < angleLimit ? increment : 0;
+
+    angle = angle < angleLimit ? angle+=increment : 0;
 }
+CubeController cc;
 int main() {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -314,16 +324,14 @@ int main() {
     glPointSize(8);
     glLineWidth(5);
     Cube cube = Cube(shaderProgram);
+    cc.setCubo(cube);
 
-    double angle = 0;
 
     while (!glfwWindowShouldClose(window)){
         processInput(window);
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
-        handleAngle(angle);
 
-        cube.fRotation(angle);
         cube.draw();
         
         glfwSwapBuffers(window);
@@ -350,7 +358,19 @@ void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
         cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;        
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
+    {
+        cc.fRotation(angle);
+        angle = angle < angleLimit ? angle += increment : 0;
+
+    }
+    if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
+    {
+        cc.BRotation(angle);
+        angle = angle < angleLimit ? angle += increment : 0;
+
+    }
 }
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 {

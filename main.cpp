@@ -55,9 +55,11 @@ int len = 3;
 struct cubito{
     unsigned int VBO, VAO;
     vector<glm::vec3 > colors;
-    cubito(vector<glm::vec3> c)
+    glm::vec3 pos;
+    cubito(vector<glm::vec3> c, glm::vec3 position)
     {
         colors = c;
+        pos = position;
         glGenBuffers(1, &VBO);
         glGenVertexArrays(1, &VAO);
         glBindVertexArray(VAO);
@@ -71,11 +73,11 @@ struct cubito{
 };
 struct camada{
     vector<cubito> arr;
-    camada(vvv3 camadaColors)
+    camada(vvv3 camadaColors, vv3 positions)
     {
         for(int i = 0; i < 9; i++)
         {
-            arr.emplace_back(cubito(camadaColors[i]));
+            arr.emplace_back(cubito(camadaColors[i], positions[i]));
         }
     }
 };
@@ -85,14 +87,13 @@ struct Cube
     vector<camada> camadasCube;
     Cube(unsigned int shaderProgram){
         shaderP = shaderProgram;
-        camada CamadaFront(coloresFront);
-        camada CamadaMiddle(coloresMiddle);
-        camada CamadaBack(coloresBack);
+        camada CamadaFront(coloresFront, cubePositionsFront);
+        camada CamadaMiddle(coloresMiddle, cubePositionsMiddle);
+        camada CamadaBack(coloresBack, cubePositionsBack);
         camadasCube.push_back(CamadaFront);
         camadasCube.push_back(CamadaMiddle);
         camadasCube.push_back(CamadaBack);
     }
-
     void draw()
     {
         // Para todos los cubitos
@@ -112,7 +113,7 @@ struct Cube
             for(int e = 0; e < 9; e++)
             {
                 glm::mat4 currCubitoModel = glm::mat4(1.0f);
-                currCubitoModel = glm::translate(currCubitoModel, positions[i][e]);
+                currCubitoModel = glm::translate(currCubitoModel, camadasCube[i].arr[e].pos);
                 unsigned int currCubitoModelLoc = glGetUniformLocation(shaderP, "model");
                 unsigned int colLoc = glGetUniformLocation(shaderP, "ourColor");
 

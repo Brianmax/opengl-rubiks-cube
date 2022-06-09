@@ -8,6 +8,8 @@
 #include <math.h>
 #include <array>
 #include "vertex.h"
+#include "solver.h"
+
 using namespace std;
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -348,9 +350,7 @@ void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
         cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-    if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS)
-        
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;        
 }
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
@@ -399,3 +399,4 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     if (fov > 45.0f)
         fov = 45.0f;
 }
+

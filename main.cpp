@@ -90,7 +90,7 @@ struct cubito {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
     }
-    void setRotation(glm::vec3& _translation, float _angle)
+    void setRotation(glm::vec<3, float> _translation, float _angle)
     {
         translation = _translation;
         angle = _angle;

@@ -5,13 +5,16 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
+#include <math.h>
 #include <array>
 #include "vertex.h"
+#include "solver.h"
+
 using namespace std;
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void processInput(GLFWwindow *window);
+void processInput(GLFWwindow* window);
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 // Variables for checking compilation/linking correctness
@@ -19,63 +22,93 @@ int success;
 char infoLog[512];
 
 // Basic vertex shader in GLSL (OpenGL Shading Language)
-const char *vertexShaderSource =
-        "#version 330 core\n"
-        "layout (location = 0) in vec3 aPos;\n"
-        "uniform mat4 model;\n"
-        "uniform mat4 view;\n"
-        "uniform mat4 projection;\n"
-        "void main() {\n"
-        "	gl_Position = projection * view * model * vec4(aPos, 1.0);\n"
-        "}\0";
+const char* vertexShaderSource =
+"#version 330 core\n"
+"layout (location = 0) in vec3 aPos;\n"
+"uniform mat4 model;\n"
+"uniform mat4 view;\n"
+"uniform mat4 projection;\n"
+"void main() {\n"
+"	gl_Position = projection * view * model * vec4(aPos, 1.0);\n"
+"}\0";
 
 // Basic fragment shader
-const char *fragmentShaderSource =
-        "#version 330 core\n"
-        "out vec4 FragColor;\n"
-        "uniform vec4 ourColor;\n"
-        "void main() {\n"
-        "	FragColor = ourColor;\n"
-        "}\0";
+const char* fragmentShaderSource =
+"#version 330 core\n"
+"out vec4 FragColor;\n"
+"uniform vec4 ourColor;\n"
+"void main() {\n"
+"	FragColor = ourColor;\n"
+"}\0";
 
 bool firstMouse = true;
-float yaw   = -90.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
-float pitch =  0.0f;
-float lastX =  800.0f / 2.0;
-float lastY =  600.0 / 2.0;
-float fov   =  45.0f;
+float yaw = -90.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
+float pitch = 0.0f;
+float lastX = 800.0f / 2.0;
+float lastY = 600.0 / 2.0;
+float fov = 45.0f;
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
-glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f,  3.0f);
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);
-// timing
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+// timing  
+
+glm::vec3 computeCircumPoints(float r, double angle, glm::vec3 origin){
+
+    float initX = (origin.x) + r * cos(glm::radians(angle));
+    float initY = (origin.y) + r * sin(glm::radians(angle));
+    //cout <<"COMPUTE CIRCUM POINTS: "<< initX << ", " << initY << '\n';
+    return glm::vec3(initX, initY, 0);
+}
 
 int len = 3;
-struct cubito{
+float radiusCorner = 0.71;
+float radiusEdge = 0.5;
+float radiusCenter = 0.0f;
+
+struct cubito {
     unsigned int VBO, VAO;
     vector<glm::vec3 > colors;
-    glm::vec3 pos;
-    cubito(vector<glm::vec3> c, glm::vec3 position)
+    glm::vec3 position;
+    glm::vec3 translation;
+    float angle;
+    cubito(vector<glm::vec3> _colors, glm::vec3 _position)
     {
-        colors = c;
-        pos = position;
+        colors = _colors;
+        position = _position;
+        angle = 0;
+        translation = glm::vec3(0.0f, 0.0f, 0.0f);
+
         glGenBuffers(1, &VBO);
         glGenVertexArrays(1, &VAO);
         glBindVertexArray(VAO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), cube_vertices, GL_STATIC_DRAW);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
     }
+    void setRotation(glm::vec<3, float> _translation, float _angle)
+    {
+        translation = _translation;
+        angle = _angle;
+    }
+    glm::vec3 getPosition()
+    {
+        if (translation.x == 0 && translation.y == 0 && translation.z == 0)
+        {
+            return position;
+        }
+        return translation;        
+    }
 };
-struct camada{
+struct camada {
     vector<cubito> arr;
     camada(vvv3 camadaColors, vv3 positions)
     {
-        for(int i = 0; i < 9; i++)
+        for (int i = 0; i < 9; i++)
         {
             arr.emplace_back(cubito(camadaColors[i], positions[i]));
         }
@@ -85,7 +118,7 @@ struct Cube
 {
     unsigned int shaderP;
     vector<camada> camadasCube;
-    Cube(unsigned int shaderProgram){
+    Cube(unsigned int shaderProgram) {
         shaderP = shaderProgram;
         camada CamadaFront(coloresFront, cubePositionsFront);
         camada CamadaMiddle(coloresMiddle, cubePositionsMiddle);
@@ -101,30 +134,38 @@ struct Cube
         projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
-        unsigned int viewLoc  = glGetUniformLocation(shaderP, "view");
-        unsigned int projectionLoc = glGetUniformLocation(shaderP,"projection");
+        unsigned int viewLoc = glGetUniformLocation(shaderP, "view");
+        unsigned int projectionLoc = glGetUniformLocation(shaderP, "projection");
 
         glUseProgram(shaderP);
 
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
-        glUniformMatrix4fv(projectionLoc,1, GL_FALSE, &projection[0][0]);
-        for(int i = 0; i < 3; i++)
+        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, &projection[0][0]);
+        for (int i = 0; i < 3; i++)
         {
-            for(int e = 0; e < 9; e++)
+            for (int e = 0; e < 9; e++)
             {
                 glm::mat4 currCubitoModel = glm::mat4(1.0f);
-                currCubitoModel = glm::translate(currCubitoModel, camadasCube[i].arr[e].pos);
+                currCubitoModel = glm::translate(currCubitoModel, camadasCube[i].arr[e].getPosition());
+                //glm::vec3* rotation = &camadasCube[i].arr[e].rotation;
+                //currCubitoModel = glm::translate(currCubitoModel, *rotation);
+                
                 unsigned int currCubitoModelLoc = glGetUniformLocation(shaderP, "model");
                 unsigned int colLoc = glGetUniformLocation(shaderP, "ourColor");
 
+
+                    
+                //cout << rotation->x <<" "<< rotation->y <<" "<< rotation->z <<" "<< '\n';
+
+                currCubitoModel = glm::rotate(currCubitoModel, camadasCube[i].arr[e].angle/57, glm::vec3(0, 0, 1));
                 glUniformMatrix4fv(currCubitoModelLoc, 1, GL_FALSE, &currCubitoModel[0][0]);
                 glBindVertexArray(camadasCube[i].arr[e].VAO);
 
-                for (int k = 0; k <= 30; k+=6)
+                for (int k = 0; k <= 30; k += 6)
                 {
                     int t = k / 6;
                     glm::vec3 CurrColor = camadasCube[i].arr[e].colors[t];
-                    glUniform4f(colLoc, CurrColor[0], CurrColor[1],CurrColor[2],1.0);
+                    glUniform4f(colLoc, CurrColor[0], CurrColor[1], CurrColor[2], 1.0);
                     glDrawArrays(GL_TRIANGLES, k, 6);
                     glUniform4f(colLoc, 0, 0, 0, 1.0);
                     glDrawArrays(GL_LINE_STRIP, k, 6);
@@ -132,8 +173,58 @@ struct Cube
             }
         }
     }
+    void fRotation(double angle) {
+        camada* camadaFront = &camadasCube[0];
+        glm::vec3 origin = camadaFront->arr[4].position;
+
+        glm::vec3 cornerRotation = computeCircumPoints(radiusCorner, angle, origin);
+        //cout << "CORNER -------------------------------------" << '\n';
+        glm::vec3 edgeRotation = computeCircumPoints(radiusEdge, angle, origin);
+        //cout << "EDGE -------------------------------------" << '\n';
+        glm::vec3 centerRotation = computeCircumPoints(radiusCenter, angle, origin);
+        //cout << "CENTER -------------------------------------" << '\n';
+
+        camadaFront->arr[0].setRotation(computeCircumPoints(radiusCorner, angle + 225, origin),angle);
+        camadaFront->arr[2].setRotation(computeCircumPoints(radiusCorner, angle + 315, origin),angle);
+        camadaFront->arr[6].setRotation(computeCircumPoints(radiusCorner, angle + 495, origin),angle);
+        camadaFront->arr[8].setRotation(computeCircumPoints(radiusCorner, angle + 405, origin), angle);
+        
+        camadaFront->arr[4].setRotation(computeCircumPoints(radiusCenter, angle, origin),angle);
+
+        camadaFront->arr[1].setRotation(computeCircumPoints(radiusEdge, angle + 270, origin),angle);
+        camadaFront->arr[3].setRotation(computeCircumPoints(radiusEdge, angle + 180, origin),angle);
+        camadaFront->arr[5].setRotation(computeCircumPoints(radiusEdge, angle , origin),angle);
+        camadaFront->arr[7].setRotation(computeCircumPoints(radiusEdge, angle + 90, origin),angle);
+
+
+        //for (int i = 0; i < 9; i++)
+        //{
+        //    glm::vec3* rotation = &camadaFront->arr[i].rotation;
+        //    //CORNERS
+        //    if (i == 0 || i == 2 || i == 6 || i == 8)
+        //    {
+        //        *rotation = computeCircumPoints(radiusCorner, angle, origin);
+        //    }
+        //    // EDGES
+        //    else if (i % 2 != 0)
+        //    {
+        //        *rotation = edgeRotation;
+        //    }
+        //    // CENTER
+        //    else {
+        //        *rotation =  centerRotation;
+        //    }
+        //}
+    }
 };
-int main(){
+
+double angleLimit = 90;
+double increment = 1;
+void handleAngle(double& angle)
+{
+    angle += angle < angleLimit ? increment : 0;
+}
+int main() {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -221,18 +312,20 @@ int main(){
 
     glEnable(GL_DEPTH_TEST);
     glPointSize(8);
-    glLineWidth(10);
+    glLineWidth(5);
     Cube cube = Cube(shaderProgram);
-    while (!glfwWindowShouldClose(window)) {
 
+    double angle = 0;
+
+    while (!glfwWindowShouldClose(window)){
         processInput(window);
-
-
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
+        handleAngle(angle);
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer now!
-
+        cube.fRotation(angle);
         cube.draw();
+        
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
@@ -246,7 +339,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
 
-void processInput(GLFWwindow *window) {
+void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
     const float cameraSpeed = 0.05f; // adjust accordingly
@@ -257,7 +350,7 @@ void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
         cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;        
 }
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
@@ -306,3 +399,4 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     if (fov > 45.0f)
         fov = 45.0f;
 }
+

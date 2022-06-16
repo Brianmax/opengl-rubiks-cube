@@ -102,19 +102,16 @@ cubestate id(cubestate state)
     return state;
 }
 
-void solve()
+void solver(vector<string> input)
 {
-    string input[] = {"UF", "UR", "UB", "UL", "DF", "DR", "DB", "DL", "FR", "FL", "BR", "BL",
-                           "UFR", "URB", "UBL", "ULF", "DRF", "DFL", "DLB", "DBR"};
     //--- Define the goal.
     string goal[] = {"UF", "UR", "UB", "UL", "DF", "DR", "DB", "DL", "FR", "FL", "BR", "BL",
                      "UFR", "URB", "UBL", "ULF", "DRF", "DFL", "DLB", "DBR"};
 
     //--- Prepare current (start) and goal state.
     cubestate currentState(40), goalState(40);
-    for (int i = 0; i < 20; i++)
+    for (int i = 0; i < 19; i++)
     {
-
         //--- Goal state.
         goalState[i] = i;
 

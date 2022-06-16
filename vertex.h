@@ -176,12 +176,97 @@ vp FswapDirectives = {
     std::make_pair(0, 6)
 };
 
-vp clockWiseColorRotation = {
+vp BswapDirectives = {
+    std::make_pair(5, 1),
+    std::make_pair(7, 5),
+    std::make_pair(3, 7),
+    std::make_pair(1, 3),
+    std::make_pair(2, 0),
+    std::make_pair(8, 2),
+    std::make_pair(6, 8),
+    std::make_pair(0, 6)
+};
+vp LswapDirectives = {
+    std::make_pair(1, 5),
+    std::make_pair(5, 7),
+    std::make_pair(7, 3),
+    std::make_pair(3, 1),
+    std::make_pair(0, 2),
+    std::make_pair(2, 8),
+    std::make_pair(8, 6),
+    std::make_pair(6, 0)
+};
+vp RswapDirectives = {
+    std::make_pair(5, 1),
+    std::make_pair(7, 5),
+    std::make_pair(3, 7),
+    std::make_pair(1, 3),
+    std::make_pair(2, 0),
+    std::make_pair(8, 2),
+    std::make_pair(6, 8),
+    std::make_pair(0, 6)
+};
+vp UswapDirectives = {
+    std::make_pair(5, 1),
+    std::make_pair(7, 5),
+    std::make_pair(3, 7),
+    std::make_pair(1, 3),
+    std::make_pair(2, 0),
+    std::make_pair(8, 2),
+    std::make_pair(6, 8),
+    std::make_pair(0, 6)
+};
+vp DswapDirectives = {
+    std::make_pair(5, 1),
+    std::make_pair(7, 5),
+    std::make_pair(3, 7),
+    std::make_pair(1, 3),
+    std::make_pair(2, 0),
+    std::make_pair(8, 2),
+    std::make_pair(6, 8),
+    std::make_pair(0, 6)
+};
+
+std::vector<vp> allDirectives = { FswapDirectives, BswapDirectives,LswapDirectives,RswapDirectives,UswapDirectives,DswapDirectives };
+
+vp FColorRotation = {
     std::make_pair(5, 2),
     std::make_pair(3, 5),
     std::make_pair(4, 3),
     std::make_pair(2, 4)
 };
+vp BColorRotation = {
+    std::make_pair(5, 2),
+    std::make_pair(3, 5),
+    std::make_pair(4, 3),
+    std::make_pair(2, 4)
+};
+vp LColorRotation = {
+    std::make_pair(1, 4),
+    std::make_pair(4, 0),
+    std::make_pair(0, 5),
+    std::make_pair(5, 1)
+};
+vp RColorRotation = {
+    std::make_pair(1, 4),
+    std::make_pair(4, 0),
+    std::make_pair(0, 5),
+    std::make_pair(5, 1)
+};
+vp UColorRotation = {
+    std::make_pair(1, 3),
+    std::make_pair(3, 0),
+    std::make_pair(0, 2),
+    std::make_pair(2, 1)
+};
+vp DColorRotation = {
+    std::make_pair(1, 3),
+    std::make_pair(3, 0),
+    std::make_pair(0, 2),
+    std::make_pair(2, 1)
+};
+
+std::vector<vp> colorRotations = { FColorRotation, BColorRotation, LColorRotation, RColorRotation, UColorRotation, DColorRotation };
 
 //Faces
 vp frontFace = {

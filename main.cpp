@@ -110,14 +110,22 @@ glm::vec3 axisRotationHandler()
         return glm::vec3(0, 1, 0);
     }
 }
+
+int cubitoId = 0;
+int camadaId = 0;
 struct cubito {
     unsigned int VBO, VAO;
     vector<glm::vec3 > colors;
     glm::vec3 position;
     glm::vec3 translation;
     float angle;
+    int id;
+    int c_id;
     cubito(vector<glm::vec3> _colors, glm::vec3 _position)
     {
+        c_id = camadaId;
+        id = cubitoId;
+        cubitoId++;
         colors = _colors;
         position = _position;
         angle = 0;
@@ -201,7 +209,17 @@ void swapCubitoColors(vv3& colors)
     vv3 tmp = colors;
     for (int i = 0; i < 4; i++)
     {
-        pair<int, int> indexes = clockWiseColorRotation[i];
+        pair<int, int> indexes = FColorRotation[i];
+        colors[indexes.second] = tmp[indexes.first];
+    }
+}
+
+void swapCubieColors(vv3& colors, int faceId)
+{
+    vv3 tmp = colors;
+    for (int i = 0; i < 4; i++)
+    {
+        pair<int, int> indexes = colorRotations[faceId][i];
         colors[indexes.second] = tmp[indexes.first];
     }
 }
@@ -213,20 +231,27 @@ void swapCamadaColors(camada& target)
     {
         pair<int, int> indexes = FswapDirectives[i];
         target.arr[indexes.first].colors = tmp.arr[indexes.second].colors;
-        swapCubitoColors(target.arr[indexes.first].colors);
+        //swapCubitoColors(target.arr[indexes.first].colors);
         target.arr[indexes.first].reset();
     }
 }
 
-void swapCamadaColors(camada& target, int faceId)
+
+void swapFaceColors(Face& target, int faceId)
 {
-    camada tmp = target;
+    vector<cubito> tmp;
+    
+    for (int i = 0; i < 9; i++)
+    {
+        tmp.push_back(*target.cubies[i]);
+    }
+
     for (int i = 0; i < 8; i++)
     {
-        pair<int, int> indexes = FswapDirectives[i];
-        target.arr[indexes.first].colors = tmp.arr[indexes.second].colors;
-        swapCubitoColors(target.arr[indexes.first].colors);
-        target.arr[indexes.first].reset();
+        pair<int, int> indexes = allDirectives[faceId][i];
+        target.cubies[indexes.first]->colors = tmp[indexes.second].colors;
+        swapCubieColors(target.cubies[indexes.first]->colors,faceId);
+        target.cubies[indexes.first]->reset();
     }
 }
 
@@ -237,8 +262,13 @@ struct Cube
     vector<camada> camadasCube;
     Cube(unsigned int shaderProgram) {
         shaderP = shaderProgram;
+
         camada CamadaFront(coloresFront, cubePositionsFront);
+        cubitoId = 0;
+        camadaId++;
         camada CamadaMiddle(coloresMiddle, cubePositionsMiddle);
+        cubitoId = 0;
+        camadaId++;
         camada CamadaBack(coloresBack, cubePositionsBack);
         camadasCube.push_back(CamadaFront);
         camadasCube.push_back(CamadaMiddle);
@@ -308,6 +338,14 @@ struct CubeController {
         cube = &_cube;
         for (auto& face : faces)
             face.buildFace(*camadasCube);
+
+        for (auto& face : faces) {
+            for (auto& cubie : face.cubies)
+            {
+                std::cout << cubie->id << "(" <<cubie->c_id<<") ";
+            }
+            std::cout << '\n';
+        }
     }
     void camadaRotation(double angle, int axis) {
         camada * camada = &cube->camadasCube[axis];
@@ -341,7 +379,7 @@ struct CubeController {
         faces[faceId].cubies[6]->setRotation(computeCircumPoints(radiusCorner, angle + sum[6], origin, faceId), angle);
         faces[faceId].cubies[8]->setRotation(computeCircumPoints(radiusCorner, angle + sum[8], origin, faceId), angle);
 
-        faces[faceId].cubies[4]->setRotation(computeCircumPoints(radiusCenter, angle + sum[4], origin, faceId), angle);
+        faces[faceId].cubies[4]->setRotation(computeCircumPoints(radiusCenter, angle, origin, faceId), angle);
 
         faces[faceId].cubies[1]->setRotation(computeCircumPoints(radiusEdge, angle + sum[1], origin, faceId), angle);
         faces[faceId].cubies[3]->setRotation(computeCircumPoints(radiusEdge, angle + sum[3], origin, faceId), angle);
@@ -370,21 +408,27 @@ struct CubeController {
             switch (rotationsQueue.front())
             {
             case rotation::front:
+                axisRotation = 0;
                 faceRotation(angle, 0);
                 break;
             case rotation::back:
+                axisRotation = 1;
                 faceRotation(angle, 1);
                 break;
             case rotation::left:
+                axisRotation = 2;
                 faceRotation(angle, 2);
                 break;
             case rotation::right:
+                axisRotation = 3;
                 faceRotation(angle, 3);
                 break;
             case rotation::up:
+                axisRotation = 4;
                 faceRotation(angle, 4);
                 break;
             case rotation::down:
+                axisRotation = 5;
                 faceRotation(angle, 5);
                 break;
             default:
@@ -400,26 +444,24 @@ struct CubeController {
                 switch (rotationsQueue.front())
                 {
                 case rotation::front:
-                    faces[0].reset();
-                    //swapCamadaColors(cube->camadasCube[0]);
+                    swapFaceColors(faces[0], 0);
                     break; 
                 case rotation::back:
-                    faces[1].reset();
+                    swapFaceColors(faces[1], 1);
                     break;
                 case rotation::left:
-                    faces[2].reset();
+                    swapFaceColors(faces[2], 2);
                     break;
 
                 case rotation::right:
-                    faces[3].reset();
+                    swapFaceColors(faces[3], 3);
                     break;
-
                 case rotation::up:
-                    faces[4].reset();
+                    swapFaceColors(faces[4], 4);
                     break;
 
                 case rotation::down:
-                    faces[5].reset();
+                    swapFaceColors(faces[5], 5);
                     break;
                 default:
                     break;
@@ -570,7 +612,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     //cout << key << '\n';
     if (key == GLFW_KEY_F && action == GLFW_PRESS)
     {
-        axisRotation = 0;
         cubeController.setRotationFlag(rotation::front);
     }
     if (key == GLFW_KEY_B && action == GLFW_PRESS)

@@ -161,10 +161,11 @@ std::vector<glm::vec3> cubePositionsBack{
 
 std::vector<std::vector<glm::vec3>> positions = {cubePositionsFront, cubePositionsMiddle, cubePositionsBack};
 
-
 #include<utility>
 
-std::vector<std::pair<int, int>> FswapDirectives = {
+typedef std::vector<std::pair<int, int>> vp;
+
+vp FswapDirectives = {
     std::make_pair(5, 1),
     std::make_pair(7, 5),
     std::make_pair(3, 7),
@@ -175,9 +176,89 @@ std::vector<std::pair<int, int>> FswapDirectives = {
     std::make_pair(0, 6)
 };
 
-std::vector<std::pair<int, int>> clockWiseColorRotation = {
+vp clockWiseColorRotation = {
     std::make_pair(5, 2),
     std::make_pair(3, 5),
     std::make_pair(4, 3),
     std::make_pair(2, 4)
 };
+
+//Faces
+vp frontFace = {
+    // (camada, indice)
+    std::make_pair(0, 0),
+    std::make_pair(0, 1),
+    std::make_pair(0, 2),
+    std::make_pair(0, 3),
+    std::make_pair(0, 4),
+    std::make_pair(0, 5),
+    std::make_pair(0, 6),
+    std::make_pair(0, 7),
+    std::make_pair(0, 8),
+};
+vp backFace = {
+    // (camada, indice)
+    std::make_pair(2, 0),
+    std::make_pair(2, 1),
+    std::make_pair(2, 2),
+    std::make_pair(2, 3),
+    std::make_pair(2, 4),
+    std::make_pair(2, 5),
+    std::make_pair(2, 6),
+    std::make_pair(2, 7),
+    std::make_pair(2, 8)
+};
+
+vp rightFace = {
+    // (camada, indice)
+    std::make_pair(0, 2),
+    std::make_pair(1, 2),
+    std::make_pair(2, 2),
+    std::make_pair(0, 5),
+    std::make_pair(1, 5),
+    std::make_pair(2, 5),
+    std::make_pair(0, 8),
+    std::make_pair(1, 8),
+    std::make_pair(2, 8)
+};
+vp leftFace = {
+    // (camada, indice)
+    std::make_pair(2, 0),
+    std::make_pair(1, 0),
+    std::make_pair(0, 0),
+    std::make_pair(2, 3),
+    std::make_pair(1, 3),
+    std::make_pair(0, 3),
+    std::make_pair(2, 6),
+    std::make_pair(1, 6),
+    std::make_pair(0, 6)
+};
+
+vp upFace = {
+    // (camada, indice)
+    std::make_pair(0, 6),
+    std::make_pair(0, 7),
+    std::make_pair(0, 8),
+    std::make_pair(1, 6),
+    std::make_pair(1, 7),
+    std::make_pair(1, 8),
+    std::make_pair(2, 6),
+    std::make_pair(2, 7),
+    std::make_pair(2, 8)
+};
+
+vp downFace = {
+    // (camada, indice)
+    std::make_pair(0, 0),
+    std::make_pair(0, 1),
+    std::make_pair(0, 2),
+    std::make_pair(1, 0),
+    std::make_pair(1, 1),
+    std::make_pair(1, 2),
+    std::make_pair(2, 0),
+    std::make_pair(2, 1),
+    std::make_pair(2, 2)
+};
+
+typedef std::vector<vp> vvp;
+vvp allFaces = { frontFace, backFace, leftFace, rightFace, upFace, downFace };

@@ -58,22 +58,34 @@ float cube_vertices[] = {
 std::vector<glm::vec3> cubeColorsFront = {
     yellow, white, green, blue, red, orange
 };
+typedef glm::vec3 v3;
 typedef std::vector<glm::vec3> vv3;
 typedef std::vector<vv3> vvv3;
 std::vector<std::vector<glm::vec3 > > coloresFront {
     //  B       F       L      R     D     U
-    vv3{black, white, green, black, red, black},
-    vv3{black, white, black, black, red, black},
-    vv3{black, white, black, blue, red, black},
+    vv3{black, white, green, black, red, black}, //0
+    vv3{black, white, black, black, red, black}, //1
+    vv3{black, white, black, blue, red, black}, //2
 
-    vv3{black, white, green, black, black, black},
-    vv3{black, white, black, black, black, black},
-    vv3{black, white, black, blue, black, black},
+    vv3{black, white, green, black, black, black}, //3
+    vv3{black, white, black, black, black, black}, //4
+    vv3{black, white, black, blue, black, black}, //5
 
-    vv3{black, white, green, black, black, orange},
-    vv3{black, white, black, black, black, orange},
-    vv3{black, white, black, blue, black, orange},
+    vv3{black, white, green, black, black, orange}, //6
+    vv3{black, white, black, black, black, orange}, //7
+    vv3{black, white, black, blue, black, orange}, //8
 };
+
+// orange - blue
+// blue - red
+// green - orange
+// red - green
+
+//black, white, black, blue, black, orange
+//black, white, black, blue, red, black
+// 0 - 6, 
+
+
 
 
 std::vector<std::vector<glm::vec3 > > coloresMiddle {
@@ -104,7 +116,6 @@ std::vector<std::vector<glm::vec3 > > coloresBack {
         vv3{yellow, black, black, black, black, orange},
         vv3{yellow, black, black, blue, black, orange}
 };
-
 
 
 //CUBOS SEPARADOS
@@ -149,3 +160,24 @@ std::vector<glm::vec3> cubePositionsBack{
 };
 
 std::vector<std::vector<glm::vec3>> positions = {cubePositionsFront, cubePositionsMiddle, cubePositionsBack};
+
+
+#include<utility>
+
+std::vector<std::pair<int, int>> FswapDirectives = {
+    std::make_pair(5, 1),
+    std::make_pair(7, 5),
+    std::make_pair(3, 7),
+    std::make_pair(1, 3),
+    std::make_pair(2, 0),
+    std::make_pair(8, 2),
+    std::make_pair(6, 8),
+    std::make_pair(0, 6)
+};
+
+std::vector<std::pair<int, int>> clockWiseColorRotation = {
+    std::make_pair(5, 2),
+    std::make_pair(3, 5),
+    std::make_pair(4, 3),
+    std::make_pair(2, 4)
+};

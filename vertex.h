@@ -262,3 +262,15 @@ vp downFace = {
 
 typedef std::vector<vp> vvp;
 vvp allFaces = { frontFace, backFace, leftFace, rightFace, upFace, downFace };
+
+
+std::vector<int> angleSumF = { 225,270,315,180,0,0,135,90,45 };
+std::vector<int> angleSumB = { 225,270,315,180,0,0,135,90,45 };
+//std::vector<int> angleSumL = { 225,270,315,180,0,0,135,90,45 };
+std::vector<int> angleSumL = { 225,180,135,270,0,90,315,0,45 };
+std::vector<int> angleSumR = { 135,180,225,90,0,270,45,0,315 };
+std::vector<int> angleSumU = { 315,0,45,270,0,90,225,180,135 };
+std::vector<int> angleSumD = { 315,0,45,270,0,90,225,180,135 };
+
+//std::vector<int> angleSumR = { 0,0,0,0,0,0,0,0,0 };
+std::vector<std::vector<int>> allAngleSums = { angleSumF, angleSumB, angleSumL,angleSumR ,angleSumU,angleSumD };

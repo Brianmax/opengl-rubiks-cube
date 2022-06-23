@@ -59,7 +59,7 @@ int rotation = 0;
 string initialCube[] = { "UF", "UR", "UB", "UL", "DF", "DR", "DB", "DL", "FR", "FL", "BR", "BL", "UFR", "URB", "UBL", "ULF", "DRF", "DFL", "DLB", "DBR" };
 
 
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 2.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 // timing  
@@ -99,9 +99,28 @@ float radiusCorner = 0.71;
 float radiusEdge = 0.5;
 float radiusCenter = 0.0f;
 int test = 55;
-
-
-
+float camY = 0.0;
+bool up = true;
+bool down = false;
+void incrementHandler()
+{
+    if(up)
+    {
+        camY = camY + 0.03;
+        if (camY > 7.0) {
+            up = false;
+            down = true;
+        }
+    }
+    else if(down)
+    {
+        camY = camY - 0.03;
+        if(camY < -7.0) {
+            down = false;
+            up = true;
+        }
+    }
+}
 glm::vec3 axisRotationHandler()
 {
     if (axisRotation <= 1)
@@ -282,9 +301,18 @@ struct Cube
     }
     void draw()
     {
+        //incrementHandler();
         glm::mat4 projection = glm::mat4(1.0f);
         projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        const float radius = 5.0f;
+        float camX = sin(glfwGetTime()) * radius;
+        float camZ = cos(glfwGetTime()) * radius;
+        float camYY = sin(glfwGetTime()) * radius;
+        //glm::mat4 view = glm::lookAt(glm::vec3(camX, camY, camZ),glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+        //glm::mat4 view = glm::lookAt(glm::vec3(camX, 0.0, camZ),glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+        glm::mat4 view = glm::lookAt(glm::vec3(0.0, camYY, camZ),glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+
+        //glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
         unsigned int viewLoc = glGetUniformLocation(shaderP, "view");
         unsigned int projectionLoc = glGetUniformLocation(shaderP, "projection");
@@ -479,8 +507,8 @@ int main() {
 
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    glfwSetCursorPosCallback(window, mouse_callback);
-    glfwSetScrollCallback(window, scroll_callback);
+    //glfwSetCursorPosCallback(window, mouse_callback);
+    //glfwSetScrollCallback(window, scroll_callback);
     glfwSetKeyCallback(window, keyCallback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 

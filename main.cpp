@@ -3,20 +3,18 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <vector>
 #include <math.h>
-#include <array>
 #include "queue"
 #include "utility"
 #include "vertex.h"
 #include "string"
 #include "solver.h"
-
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+unsigned int shaderProgram;
 using namespace std;
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
@@ -28,21 +26,26 @@ char infoLog[512];
 const char* vertexShaderSource =
 "#version 330 core\n"
 "layout (location = 0) in vec3 aPos;\n"
+"layout (location = 1) in vec2 aCoord;\n"
+"out vec2 TexCoord;\n"
 "uniform mat4 model;\n"
 "uniform mat4 view;\n"
 "uniform mat4 projection;\n"
-"void main() {\n"
+"void main(){\n"
 "	gl_Position = projection * view * model * vec4(aPos, 1.0);\n"
-"}\0";
+"   TexCoord = vec2(aCoord.x, 1.0 - aCoord.y);\n"
+"}\n";
 
 // Basic fragment shader
 const char* fragmentShaderSource =
 "#version 330 core\n"
 "out vec4 FragColor;\n"
+"in vec2 TexCoord;\n"
+"uniform sampler2D texture1;\n"
 "uniform vec4 ourColor;\n"
 "void main() {\n"
-"	FragColor = ourColor;\n"
-"}\0";
+"	FragColor = texture(texture1, TexCoord);\n"
+"}\n";
 
 bool firstMouse = true;
 float yaw = -90.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
@@ -160,10 +163,14 @@ struct cubito {
         glBindVertexArray(VAO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), cube_vertices, GL_STATIC_DRAW);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
+
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+        //glBindBuffer(GL_ARRAY_BUFFER, 0);
+        //glBindVertexArray(0);
+        //glBindVertexArray(0);
     }
     void setRotation(glm::vec<3, float> _translation, float _angle)
     {
@@ -278,9 +285,8 @@ void swapFaceColors(Face& target, int faceId)
         swapCubieColors(target.cubies[indexes.first]->colors,faceId);
         target.cubies[indexes.first]->reset();
     }
+    target.cubies[4]->reset();
 }
-
-
 struct Cube
 {
     unsigned int shaderP;
@@ -301,16 +307,16 @@ struct Cube
     }
     void draw()
     {
-        //incrementHandler();
+        incrementHandler();
         glm::mat4 projection = glm::mat4(1.0f);
         projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         const float radius = 5.0f;
         float camX = sin(glfwGetTime()) * radius;
         float camZ = cos(glfwGetTime()) * radius;
         float camYY = sin(glfwGetTime()) * radius;
-        //glm::mat4 view = glm::lookAt(glm::vec3(camX, camY, camZ),glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+        glm::mat4 view = glm::lookAt(glm::vec3(camX, camY, camZ),glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
         //glm::mat4 view = glm::lookAt(glm::vec3(camX, 0.0, camZ),glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
-        glm::mat4 view = glm::lookAt(glm::vec3(0.0, camYY, camZ),glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+        //glm::mat4 view = glm::lookAt(glm::vec3(0.0, camYY, camZ),glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
 
         //glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
@@ -335,15 +341,21 @@ struct Cube
                 
                 glUniformMatrix4fv(currCubitoModelLoc, 1, GL_FALSE, &currCubitoModel[0][0]);
                 glBindVertexArray(camadasCube[i].arr[e].VAO);
-
+                int a = 0;
                 for (int k = 0; k <= 30; k += 6)
                 {
                     int t = k / 6;
                     glm::vec3 CurrColor = camadasCube[i].arr[e].colors[t];
-                    glUniform4f(colLoc, CurrColor[0], CurrColor[1], CurrColor[2], 1.0);
+                    glActiveTexture(GL_TEXTURE0);
+                    glBindTexture(GL_TEXTURE_2D, texturesCube[i][e][a%7]);
+                    //cout<< "Texture ID: "<< texturesCube[i][e][a%7] << endl;
+                    //glUniform4f(colLoc, CurrColor[0], CurrColor[1], CurrColor[2], 1.0);
+                    glUseProgram(shaderP);
+                    glBindVertexArray(camadasCube[i].arr[e].VAO);
                     glDrawArrays(GL_TRIANGLES, k, 6);
-                    glUniform4f(colLoc, 0, 0, 0, 1.0);
-                    glDrawArrays(GL_LINE_STRIP, k, 6);
+                    //glUniform4f(colLoc, 0, 0, 0, 1.0);
+                    //glDrawArrays(GL_LINE_STRIP, k, 6);
+                    a++;
                 }
             }
         }
@@ -485,20 +497,19 @@ CubeController cubeController;
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
-
 int main() {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
     if (window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return -1;
     }
     glfwMakeContextCurrent(window);
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
@@ -551,7 +562,7 @@ int main() {
     // 2. Link shaders
 
     // Create a shader program
-    unsigned int shaderProgram;
+
     shaderProgram = glCreateProgram();
 
     // Attach the compiled shaders to the shader program
@@ -571,7 +582,35 @@ int main() {
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
+
     glEnable(GL_DEPTH_TEST);
+    glGenTextures(7, &textures[0]);
+    for (int i = 0; i < 7; i++) {
+        glBindTexture(GL_TEXTURE_2D, textures[i]);
+        // set the texture wrapping parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        // set texture filtering parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        // load image, create texture and generate mipmaps
+        int width, height, nrChannels;
+        string tmp = "./image" + to_string(i + 1) + ".jpg";
+        cout << "File: " << tmp << endl;
+        stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
+        unsigned char *data = stbi_load(tmp.c_str(), &width, &height, &nrChannels, 0);
+        if (data) {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+            glGenerateMipmap(GL_TEXTURE_2D);
+        } else {
+            std::cout << "Failed to load texture" << std::endl;
+        }
+        stbi_image_free(data);
+        glUseProgram(shaderProgram);
+        //ourShader.setInt("texture1", 0);
+        int loc = glGetUniformLocation(shaderProgram, "texture1");
+        glUniform1i(loc, 0);
+    }
     glPointSize(8);
     glLineWidth(5);
     Cube cube = Cube(shaderProgram);

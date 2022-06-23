@@ -2,7 +2,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
-
+using namespace std;
 #define red glm::vec3(1.0,0.0,0.0)
 #define green glm::vec3(0.0,1.0,0.0)
 #define blue glm::vec3(0.0,0.0,1.0)
@@ -10,51 +10,60 @@
 #define orange glm::vec3(1.0,0.5,0.0)
 #define yellow glm::vec3(1.0,1.0,0.0)
 #define black glm::vec3(0.0,0.0,0.0)
-
+unsigned int textures[7] = {1,2,3,4,5,6,7};
 float cube_vertices[] = {
         // back
-        -0.2f, -0.2f, -0.2f,
-        0.2f, -0.2f, -0.2f,
-        0.2f,  0.2f, -0.2f,
-        0.2f,  0.2f, -0.2f,
-        -0.2f,  0.2f, -0.2f,
-        -0.2f, -0.2f, -0.2f,
+        -0.2f, -0.2f, -0.2f, 0.0f, 0.0f,
+        0.2f, -0.2f, -0.2f, 1.0f, 0.0f,
+        0.2f,  0.2f, -0.2f, 1.0f, 1.0f,
+        0.2f,  0.2f, -0.2f, 1.0f, 1.0f,
+        -0.2f,  0.2f, -0.2f, 0.0f, 1.0f,
+        -0.2f, -0.2f, -0.2f, 0.0f, 0.0f,
         //front
-        -0.2f, -0.2f,  0.2f,
-        0.2f, -0.2f,  0.2f,
-        0.2f,  0.2f,  0.2f,
-        0.2f,  0.2f,  0.2f,
-        -0.2f,  0.2f,  0.2f,
-        -0.2f, -0.2f,  0.2f,
+        -0.2f, -0.2f,  0.2f, 0.0f, 0.0f,
+        0.2f, -0.2f,  0.2f, 1.0f, 0.0f,
+        0.2f,  0.2f,  0.2f, 1.0f, 1.0f,
+        0.2f,  0.2f,  0.2f, 1.0f, 1.0f,
+        -0.2f,  0.2f,  0.2f, 0.0f, 1.0f,
+        -0.2f, -0.2f,  0.2f, 0.0f, 0.0f,
         //left
-        -0.2f,  0.2f,  0.2f,
-        -0.2f,  0.2f, -0.2f,
-        -0.2f, -0.2f, -0.2f,
-        -0.2f, -0.2f, -0.2f,
-        -0.2f, -0.2f,  0.2f,
-        -0.2f,  0.2f,  0.2f,
+        -0.2f,  0.2f,  0.2f, 0.0f, 0.0f,
+        -0.2f,  0.2f, -0.2f, 1.0f, 0.0f,
+        -0.2f, -0.2f, -0.2f, 1.0f, 1.0f,
+        -0.2f, -0.2f, -0.2f, 1.0f, 1.0f,
+        -0.2f, -0.2f,  0.2f, 0.0f, 1.0f,
+        -0.2f,  0.2f,  0.2f, 0.0f, 0.0f,
         //right
-        0.2f,  0.2f,  0.2f,
-        0.2f,  0.2f, -0.2f,
-        0.2f, -0.2f, -0.2f,
-        0.2f, -0.2f, -0.2f,
-        0.2f, -0.2f,  0.2f,
-        0.2f,  0.2f,  0.2f,
+        0.2f,  0.2f,  0.2f, 0.0f, 0.0f,
+        0.2f,  0.2f, -0.2f, 1.0f, 0.0f,
+        0.2f, -0.2f, -0.2f, 1.0f, 1.0f,
+        0.2f, -0.2f, -0.2f, 1.0f, 1.0f,
+        0.2f, -0.2f,  0.2f, 0.0f, 1.0f,
+        0.2f,  0.2f,  0.2f, 0.0f, 0.0f,
         //down
-        -0.2f, -0.2f, -0.2f,
-        0.2f, -0.2f, -0.2f,
-        0.2f, -0.2f,  0.2f,
-        0.2f, -0.2f,  0.2f,
-        -0.2f, -0.2f,  0.2f,
-        -0.2f, -0.2f, -0.2f,
+        -0.2f, -0.2f, -0.2f, 0.0f, 0.0f,
+        0.2f, -0.2f, -0.2f, 1.0f, 0.0f,
+        0.2f, -0.2f,  0.2f, 1.0f, 1.0f,
+        0.2f, -0.2f,  0.2f, 1.0f, 1.0f,
+        -0.2f, -0.2f,  0.2f, 0.0f, 1.0f,
+        -0.2f, -0.2f, -0.2f, 0.0f, 0.0f,
         //up
-        -0.2f,  0.2f, -0.2f,
-        0.2f,  0.2f, -0.2f,
-        0.2f,  0.2f,  0.2f,
-        0.2f,  0.2f,  0.2f,
-        -0.2f,  0.2f,  0.2f,
-        -0.2f,  0.2f, -0.2f
+        -0.2f,  0.2f, -0.2f, 0.0f, 0.0f,
+        0.2f,  0.2f, -0.2f, 1.0f, 0.0f,
+        0.2f,  0.2f,  0.2f, 1.0f, 1.0f,
+        0.2f,  0.2f,  0.2f, 1.0f, 1.0f,
+        -0.2f,  0.2f,  0.2f, 0.0f, 1.0f,
+        -0.2f,  0.2f, -0.2f, 0.0f, 0.0f,
 };
+#define blackT textures[6]
+#define whiteT textures[5]
+#define blueT textures[4]
+#define greenT textures[3]
+#define redT textures[2]
+#define yellowT textures[1]
+#define orangeT textures[0]
+
+
 std::vector<glm::vec3> cubeColorsFront = {
     yellow, white, green, blue, red, orange
 };
@@ -75,7 +84,19 @@ std::vector<std::vector<glm::vec3 > > coloresFront {
     vv3{black, white, black, black, black, orange}, //7
     vv3{black, white, black, blue, black, orange}, //8
 };
+vector<vector<unsigned int> > texturesFront {
+    {blackT, whiteT, greenT, blackT, redT, blackT},
+    {blackT, whiteT, blackT, blackT, redT, blackT},
+    {blackT, whiteT, blackT, blueT, redT, blackT},
 
+    {blackT, whiteT, greenT, blackT, blackT, blackT},
+    {blackT, whiteT, blackT, blackT, blackT, blackT},
+    {blackT, whiteT, blackT, blueT, blackT, blackT},
+
+    {blackT, whiteT, greenT, blackT, blackT, orangeT},
+    {blackT, whiteT, blackT, blackT, blackT, orangeT},
+    {blackT, whiteT, blackT, blueT, blackT, orangeT},
+    };
 // orange - blue
 // blue - red
 // green - orange
@@ -102,6 +123,21 @@ std::vector<std::vector<glm::vec3 > > coloresMiddle {
         vv3{black, black, black, black, black, orange},
         vv3{black, black, black, blue, black, orange}
 };
+
+std::vector<std::vector<unsigned int > > texturesMiddle {
+        //  B       F       L      R     D     U
+        {blackT, blackT, greenT, blackT, redT, blackT},
+        {blackT, blackT, blackT, blackT, redT, blackT},
+        {blackT, blackT, blackT, blueT, redT, blackT},
+
+        {blackT, blackT, greenT, blackT, blackT, blackT},
+        {blackT, blackT, blackT, blackT, blackT, blackT},
+        {blackT, blackT, blackT, blueT, blackT, blackT},
+
+        {blackT, blackT, greenT, blackT, blackT, orangeT},
+        {blackT, blackT, blackT, blackT, blackT, orangeT},
+        {blackT, blackT, blackT, blueT, blackT, orangeT}
+};
 std::vector<std::vector<glm::vec3 > > coloresBack {
         //  B       F       L      R      D      U
         vv3{yellow, black, green, black, red, black},
@@ -117,7 +153,21 @@ std::vector<std::vector<glm::vec3 > > coloresBack {
         vv3{yellow, black, black, blue, black, orange}
 };
 
+std::vector<std::vector<unsigned int > > texturesBack {
+        //  B       F       L      R      D      U
+        {yellowT, blackT, greenT, blackT, redT, blackT},
+        {yellowT, blackT, blackT, blackT, redT, blackT},
+        {yellowT, blackT, blackT, blueT, redT, blackT},
 
+        {yellowT, blackT, greenT, blackT, blackT, blackT},
+        {yellowT, blackT, blackT, blackT, blackT, blackT},
+        {yellowT, blackT, blackT, blueT, blackT, blackT},
+
+        {yellowT, blackT, greenT, blackT, blackT, orangeT},
+        {yellowT, blackT, blackT, blackT, blackT, orangeT},
+        {yellowT, blackT, blackT, blueT, blackT, orangeT}
+};
+vector<vector<vector<unsigned int>>> texturesCube = {texturesFront, texturesMiddle, texturesBack};
 //CUBOS SEPARADOS
 std::vector<glm::vec3> cubePositionsFront = {
         glm::vec3(-0.8f, -0.8f, 0.0f), //C 0

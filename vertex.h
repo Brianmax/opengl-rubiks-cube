@@ -11,6 +11,7 @@
 #define yellow glm::vec3(1.0,1.0,0.0)
 #define black glm::vec3(0.0,0.0,0.0)
 
+
 float cube_vertices[] = {
         // back
         -0.2f, -0.2f, -0.2f,
@@ -55,14 +56,15 @@ float cube_vertices[] = {
         -0.2f,  0.2f,  0.2f,
         -0.2f,  0.2f, -0.2f
 };
-std::vector<glm::vec3> cubeColorsFront = {
-    yellow, white, green, blue, red, orange
-};
+
 typedef glm::vec3 v3;
 typedef std::vector<glm::vec3> vv3;
 typedef std::vector<vv3> vvv3;
+
+//vector<glm::vec3> colors = { red, green, blue, white, orange, yellow, black };
+// red(0), green(1), blue, white, orange, yellow, black
 std::vector<std::vector<glm::vec3 > > coloresFront {
-    //  B       F       L      R     D     U
+    //  B(0)    F(1)   L(2)   R(3)  D(4)  U(5)
     vv3{black, white, green, black, red, black}, //0
     vv3{black, white, black, black, red, black}, //1
     vv3{black, white, black, blue, red, black}, //2
@@ -75,18 +77,6 @@ std::vector<std::vector<glm::vec3 > > coloresFront {
     vv3{black, white, black, black, black, orange}, //7
     vv3{black, white, black, blue, black, orange}, //8
 };
-
-// orange - blue
-// blue - red
-// green - orange
-// red - green
-
-//black, white, black, blue, black, orange
-//black, white, black, blue, red, black
-// 0 - 6, 
-
-
-
 
 std::vector<std::vector<glm::vec3 > > coloresMiddle {
         //  B       F       L      R     D     U
@@ -321,15 +311,15 @@ vp leftFace = {
 
 vp upFace = {
     // (camada, indice)
-    std::make_pair(0, 6),
-    std::make_pair(0, 7),
-    std::make_pair(0, 8),
-    std::make_pair(1, 6),
-    std::make_pair(1, 7),
-    std::make_pair(1, 8),
-    std::make_pair(2, 6),
-    std::make_pair(2, 7),
-    std::make_pair(2, 8)
+    std::make_pair(0, 6), // 0
+    std::make_pair(0, 7), // 1
+    std::make_pair(0, 8), // 2
+    std::make_pair(1, 6), // 3
+    std::make_pair(1, 7), // 4
+    std::make_pair(1, 8), // 5
+    std::make_pair(2, 6), // 6
+    std::make_pair(2, 7), // 7
+    std::make_pair(2, 8)  // 8
 };
 
 vp downFace = {
@@ -359,3 +349,5 @@ std::vector<int> angleSumD = { 315,0,45,270,0,90,225,180,135 };
 
 //std::vector<int> angleSumR = { 0,0,0,0,0,0,0,0,0 };
 std::vector<std::vector<int>> allAngleSums = { angleSumF, angleSumB, angleSumL,angleSumR ,angleSumU,angleSumD };
+
+

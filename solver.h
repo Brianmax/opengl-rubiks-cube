@@ -107,7 +107,7 @@ void solver(vector<string>input, vector<string>& output)
 
     // Recibe
     //--- Define the goal.
-    phase=0;
+    phase = 0;
     string goal[] = { "UF", "UR", "UB", "UL", "DF", "DR", "DB", "DL", "FR", "FL", "BR", "BL",
                      "UFR", "URB", "UBL", "ULF", "DRF", "DFL", "DLB", "DBR" };
 

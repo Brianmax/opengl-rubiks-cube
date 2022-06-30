@@ -13,48 +13,48 @@
 
 
 float cube_vertices[] = {
-        // back
-        -0.2f, -0.2f, -0.2f,
-        0.2f, -0.2f, -0.2f,
-        0.2f,  0.2f, -0.2f,
-        0.2f,  0.2f, -0.2f,
-        -0.2f,  0.2f, -0.2f,
-        -0.2f, -0.2f, -0.2f,
-        //front
-        -0.2f, -0.2f,  0.2f,
-        0.2f, -0.2f,  0.2f,
-        0.2f,  0.2f,  0.2f,
-        0.2f,  0.2f,  0.2f,
-        -0.2f,  0.2f,  0.2f,
-        -0.2f, -0.2f,  0.2f,
-        //left
-        -0.2f,  0.2f,  0.2f,
-        -0.2f,  0.2f, -0.2f,
-        -0.2f, -0.2f, -0.2f,
-        -0.2f, -0.2f, -0.2f,
-        -0.2f, -0.2f,  0.2f,
-        -0.2f,  0.2f,  0.2f,
-        //right
-        0.2f,  0.2f,  0.2f,
-        0.2f,  0.2f, -0.2f,
-        0.2f, -0.2f, -0.2f,
-        0.2f, -0.2f, -0.2f,
-        0.2f, -0.2f,  0.2f,
-        0.2f,  0.2f,  0.2f,
-        //down
-        -0.2f, -0.2f, -0.2f,
-        0.2f, -0.2f, -0.2f,
-        0.2f, -0.2f,  0.2f,
-        0.2f, -0.2f,  0.2f,
-        -0.2f, -0.2f,  0.2f,
-        -0.2f, -0.2f, -0.2f,
-        //up
-        -0.2f,  0.2f, -0.2f,
-        0.2f,  0.2f, -0.2f,
-        0.2f,  0.2f,  0.2f,
-        0.2f,  0.2f,  0.2f,
-        -0.2f,  0.2f,  0.2f,
-        -0.2f,  0.2f, -0.2f
+    // back
+    -0.2f, -0.2f, -0.2f,
+    0.2f, -0.2f, -0.2f,
+    0.2f,  0.2f, -0.2f,
+    0.2f,  0.2f, -0.2f,
+    -0.2f,  0.2f, -0.2f,
+    -0.2f, -0.2f, -0.2f,
+    //front
+    -0.2f, -0.2f,  0.2f,
+    0.2f, -0.2f,  0.2f,
+    0.2f,  0.2f,  0.2f,
+    0.2f,  0.2f,  0.2f,
+    -0.2f,  0.2f,  0.2f,
+    -0.2f, -0.2f,  0.2f,
+    //left
+    -0.2f,  0.2f,  0.2f,
+    -0.2f,  0.2f, -0.2f,
+    -0.2f, -0.2f, -0.2f,
+    -0.2f, -0.2f, -0.2f,
+    -0.2f, -0.2f,  0.2f,
+    -0.2f,  0.2f,  0.2f,
+    //right
+    0.2f,  0.2f,  0.2f,
+    0.2f,  0.2f, -0.2f,
+    0.2f, -0.2f, -0.2f,
+    0.2f, -0.2f, -0.2f,
+    0.2f, -0.2f,  0.2f,
+    0.2f,  0.2f,  0.2f,
+    //down
+    -0.2f, -0.2f, -0.2f,
+    0.2f, -0.2f, -0.2f,
+    0.2f, -0.2f,  0.2f,
+    0.2f, -0.2f,  0.2f,
+    -0.2f, -0.2f,  0.2f,
+    -0.2f, -0.2f, -0.2f,
+    //up
+    -0.2f,  0.2f, -0.2f,
+    0.2f,  0.2f, -0.2f,
+    0.2f,  0.2f,  0.2f,
+    0.2f,  0.2f,  0.2f,
+    -0.2f,  0.2f,  0.2f,
+    -0.2f,  0.2f, -0.2f
 };
 
 typedef glm::vec3 v3;
@@ -63,7 +63,7 @@ typedef std::vector<vv3> vvv3;
 
 //vector<glm::vec3> colors = { red, green, blue, white, orange, yellow, black };
 // red(0), green(1), blue, white, orange, yellow, black
-std::vector<std::vector<glm::vec3 > > coloresFront {
+std::vector<std::vector<glm::vec3 > > coloresFront{
     //  B(0)    F(1)   L(2)   R(3)  D(4)  U(5)
     vv3{black, white, green, black, red, black}, //0
     vv3{black, white, black, black, red, black}, //1
@@ -78,33 +78,33 @@ std::vector<std::vector<glm::vec3 > > coloresFront {
     vv3{black, white, black, blue, black, orange}, //8
 };
 
-std::vector<std::vector<glm::vec3 > > coloresMiddle {
-        //  B       F       L      R     D     U
-        vv3{black, black, green, black, red, black},
-        vv3{black, black, black, black, red, black},
-        vv3{black, black, black, blue, red, black},
+std::vector<std::vector<glm::vec3 > > coloresMiddle{
+    //  B       F       L      R     D     U
+    vv3{black, black, green, black, red, black},
+    vv3{black, black, black, black, red, black},
+    vv3{black, black, black, blue, red, black},
 
-        vv3{black, black, green, black, black, black},
-        vv3{black, black, black, black, black, black},
-        vv3{black, black, black, blue, black, black},
+    vv3{black, black, green, black, black, black},
+    vv3{black, black, black, black, black, black},
+    vv3{black, black, black, blue, black, black},
 
-        vv3{black, black, green, black, black, orange},
-        vv3{black, black, black, black, black, orange},
-        vv3{black, black, black, blue, black, orange}
+    vv3{black, black, green, black, black, orange},
+    vv3{black, black, black, black, black, orange},
+    vv3{black, black, black, blue, black, orange}
 };
-std::vector<std::vector<glm::vec3 > > coloresBack {
-        //  B       F       L      R      D      U
-        vv3{yellow, black, green, black, red, black},
-        vv3{yellow, black, black, black, red, black},
-        vv3{yellow, black, black, blue, red, black},
+std::vector<std::vector<glm::vec3 > > coloresBack{
+    //  B       F       L      R      D      U
+    vv3{yellow, black, green, black, red, black},
+    vv3{yellow, black, black, black, red, black},
+    vv3{yellow, black, black, blue, red, black},
 
-        vv3{yellow, black, green, black, black, black},
-        vv3{yellow, black, black, black, black, black},
-        vv3{yellow, black, black, blue, black, black},
+    vv3{yellow, black, green, black, black, black},
+    vv3{yellow, black, black, black, black, black},
+    vv3{yellow, black, black, blue, black, black},
 
-        vv3{yellow, black, green, black, black, orange},
-        vv3{yellow, black, black, black, black, orange},
-        vv3{yellow, black, black, blue, black, orange}
+    vv3{yellow, black, green, black, black, orange},
+    vv3{yellow, black, black, black, black, orange},
+    vv3{yellow, black, black, blue, black, orange}
 };
 
 
@@ -149,7 +149,7 @@ std::vector<glm::vec3> cubePositionsBack{
         glm::vec3(0.2f,  0.2f, -1.0f)
 };
 
-std::vector<std::vector<glm::vec3>> positions = {cubePositionsFront, cubePositionsMiddle, cubePositionsBack};
+std::vector<std::vector<glm::vec3>> positions = { cubePositionsFront, cubePositionsMiddle, cubePositionsBack };
 
 #include<utility>
 

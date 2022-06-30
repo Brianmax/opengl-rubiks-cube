@@ -58,6 +58,7 @@ int rotation = 0;
 bool bussy = false;
 
 
+
 // 12 primeros - bordes
 // 8 restantes - esquinas
 string initialCube[] = { "UF", "UR", "UB", "UL", "DF", "DR", "DB", "DL", "FR", "FL", "BR", "BL", "UFR", "URB", "UBL", "ULF", "DRF", "DFL", "DLB", "DBR" };
@@ -96,6 +97,7 @@ glm::vec3 computeCircumPoints(float r, double angle, glm::vec3 origin, int faceI
         return glm::vec3(initX, origin.y, initZ);
     }
 }
+
 int axisRotation = 0;
 int len = 3;
 float radiusCorner = 0.71;
@@ -121,11 +123,47 @@ glm::vec3 axisRotationHandler()
 
 int cubitoId = 0;
 int camadaId = 0;
+
+
+struct AnimationHandler {
+    bool running;
+    float speed;
+    glm::vec3 increments;
+    glm::vec3 currState;
+    glm::vec3 initState;
+    glm::vec3 finalState;
+    AnimationHandler() {
+        running = false;
+    };
+    void computeIncrements()
+    {
+        glm::vec3 increments = (finalState - initState)*speed;
+    }
+    void setAnimation(glm::vec3 initPos, glm::vec3 finalPos, float _speed)
+    {
+        initState = initPos;
+        finalState = finalPos;
+        currState = initState;
+        speed = 1/_speed;
+        computeIncrements();
+    }
+    void execute()
+    {
+        if (currState == initState) running = true;
+        if (running) {
+            currState += increments;
+            if (currState == finalState) running = false;
+        }
+    }
+};
+
 struct cubito {
     unsigned int VBO, VAO;
     vector<glm::vec3 > colors;
     glm::vec3 position;
     glm::vec3 translation;
+    glm::vec3 animation;
+    AnimationHandler ah;
     float angle;
     int id;
     int c_id;
@@ -138,6 +176,7 @@ struct cubito {
         position = _position;
         angle = 0;
         translation = glm::vec3(0.0f, 0.0f, 0.0f);
+        animation = glm::vec3(0.0f, 0.0f, 0.0f);
 
         glGenBuffers(1, &VBO);
         glGenVertexArrays(1, &VAO);
@@ -166,6 +205,18 @@ struct cubito {
             return position;
         }
         return translation;        
+    }
+    void setAnimationVector(glm::vec3 animationVector)
+    {
+        ah.setAnimation(position, animationVector, 0.3);
+    }
+    bool isAnimationRunning() {
+        return ah.running;
+    }
+    glm::vec3 getAnimationVector()
+    {
+        ah.execute();
+        return ah.currState;
     }
 
     string getColors(int colorIdx)
@@ -307,8 +358,15 @@ struct Cube
                 unsigned int currCubitoModelLoc = glGetUniformLocation(shaderP, "model");
                 unsigned int colLoc = glGetUniformLocation(shaderP, "ourColor");
 
-                currCubitoModel = glm::rotate(currCubitoModel, glm::radians(camadasCube[i].arr[e].angle), axisRotationHandler());
-                
+                bool animationRunning = camadasCube[i].arr[e].isAnimationRunning();
+
+                if (!animationRunning) {
+                    currCubitoModel = glm::rotate(currCubitoModel, glm::radians(camadasCube[i].arr[e].angle), axisRotationHandler());
+                } else {
+                    cout << "Running" << '\n';
+                    currCubitoModel = glm::translate(currCubitoModel, camadasCube[i].arr[e].getAnimationVector());
+                }
+
                 glUniformMatrix4fv(currCubitoModelLoc, 1, GL_FALSE, &currCubitoModel[0][0]);
                 glBindVertexArray(camadasCube[i].arr[e].VAO);
 
@@ -324,7 +382,18 @@ struct Cube
             }
         }
     }
-};
+};  
+// DÍA DEL EXAMEN FINAL
+// RETOS:
+// 1. RESPIRAR
+// 2. QUE SE ARME SOLO
+// 3. CUBO DE CUBOS
+
+// PARA EL JUEVES AVANCE
+
+// PARA EL EXÁMEN:
+// PRIMITIVAS DE TEXTURA
+// 
 
 double angle = 0;
 double angleLimit = 89.0f;
@@ -519,6 +588,28 @@ struct CubeController {
                 swapFaceColors(faces[rotationsQueue.front()], rotationsQueue.front());
                 rotationsQueue.pop();
             }
+        }
+    }
+    vector<glm::vec3> animationVectors = {
+    glm::vec3(0,0.4,0)
+    };
+
+    vector<vector<int>> animationDirectives = {
+        //camada, indexCubo, vector
+        {0, 1, 0}
+    };
+
+    void animate()
+    {
+        cout << "Animate" << '\n';
+        int n = animationDirectives.size();
+        for (int i = 0; i < n; i++)
+        {
+            int indexCamada = animationDirectives[i][0];
+            int indexCubito = animationDirectives[i][1];
+            int indexVector = animationDirectives[i][2];
+
+            cube->camadasCube[indexCamada].arr[indexCubito].setAnimationVector(animationVectors[indexVector]);
         }
     }
     void solve()
@@ -724,6 +815,10 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     if (key == GLFW_KEY_S && action == GLFW_PRESS)
     {
         cubeController.solve();
+    }
+    if (key == GLFW_KEY_A && action == GLFW_PRESS)
+    {
+        cubeController.animate();
     }
     if (key == 93 && action == GLFW_PRESS)
     {

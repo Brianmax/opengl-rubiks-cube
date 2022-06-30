@@ -188,7 +188,7 @@ struct cubito {
         {
             return position;
         }
-        return translation;        
+        return translation;
     }
 };
 
@@ -315,8 +315,8 @@ struct Cube
         float camZ = cos(glfwGetTime()) * radius;
         float camYY = sin(glfwGetTime()) * radius;
         //glm::mat4 view = glm::lookAt(glm::vec3(camX, camY, camZ),glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
-        //glm::mat4 view = glm::lookAt(glm::vec3(camX, 0.0, camZ),glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
-        glm::mat4 view = glm::lookAt(glm::vec3(0.0, camYY, camZ),glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+        glm::mat4 view = glm::lookAt(glm::vec3(camX, 0.0, camZ),glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));7
+        //glm::mat4 view = glm::lookAt(glm::vec3(0.0, camYY, camZ),glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
 
         //glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
@@ -348,13 +348,9 @@ struct Cube
                     glm::vec3 CurrColor = camadasCube[i].arr[e].colors[t];
                     glActiveTexture(GL_TEXTURE0);
                     glBindTexture(GL_TEXTURE_2D, texturesCube[i][e][a%7]);
-                    //cout<< "Texture ID: "<< texturesCube[i][e][a%7] << endl;
-                    //glUniform4f(colLoc, CurrColor[0], CurrColor[1], CurrColor[2], 1.0);
                     glUseProgram(shaderP);
                     glBindVertexArray(camadasCube[i].arr[e].VAO);
                     glDrawArrays(GL_TRIANGLES, k, 6);
-                    //glUniform4f(colLoc, 0, 0, 0, 1.0);
-                    //glDrawArrays(GL_LINE_STRIP, k, 6);
                     a++;
                 }
             }
@@ -584,9 +580,9 @@ int main() {
 
 
     glEnable(GL_DEPTH_TEST);
-    glGenTextures(7, &textures[0]);
-    for (int i = 0; i < 7; i++) {
-        glBindTexture(GL_TEXTURE_2D, textures[i]);
+    glGenTextures(55, &textures2[0]);
+    for (int i = 0; i < 55; i++) {
+        glBindTexture(GL_TEXTURE_2D, textures2[i]);
         // set the texture wrapping parameters
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -595,8 +591,9 @@ int main() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         // load image, create texture and generate mipmaps
         int width, height, nrChannels;
-        string tmp = "./image" + to_string(i + 1) + ".jpg";
-        cout << "File: " << tmp << endl;
+        //string tmp = "./image" + to_string(i + 1) + ".jpg";
+        string tmp = "./img" + to_string(i + 1) + ".jpg";
+        cout << "File: " << tmp << "    "<< textures[i] << endl;
         stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
         unsigned char *data = stbi_load(tmp.c_str(), &width, &height, &nrChannels, 0);
         if (data) {

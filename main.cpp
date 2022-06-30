@@ -874,7 +874,7 @@ void processInput(GLFWwindow* window) {
         cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 }
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    cout << key << '\n';
+    //cout << key << '\n';
     if (key == GLFW_KEY_F && action == GLFW_PRESS)
     {
         cubeController.setRotationFlag(0);

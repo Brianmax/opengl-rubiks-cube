@@ -58,16 +58,20 @@ float lastFrame = 0.0f;
 
 //enum class rotation { front, back, down, up, right, left };
 int rotation = 0;
+bool bussy = false;
 
+
+
+// 12 primeros - bordes
+// 8 restantes - esquinas
 string initialCube[] = { "UF", "UR", "UB", "UL", "DF", "DR", "DB", "DL", "FR", "FL", "BR", "BL", "UFR", "URB", "UBL", "ULF", "DRF", "DFL", "DLB", "DBR" };
-
 
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 2.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 // timing  
 
-glm::vec3 computeCircumPoints(float r, double angle, glm::vec3 origin){
+glm::vec3 computeCircumPoints(float r, double angle, glm::vec3 origin) {
 
     float initX = (origin.x) + r * cos(glm::radians(angle));
     float initY = (origin.y) + r * sin(glm::radians(angle));
@@ -83,7 +87,7 @@ glm::vec3 computeCircumPoints(float r, double angle, glm::vec3 origin, int faceI
         float initY = (origin.y) + r * sin(glm::radians(angle));
         return glm::vec3(initX, initY, origin.z);
     }
-    else if(faceId <= 3) {
+    else if (faceId <= 3) {
         //rl
         float initY = (origin.y) + r * cos(glm::radians(angle));
         float initZ = (origin.z) + r * sin(glm::radians(angle));
@@ -96,6 +100,7 @@ glm::vec3 computeCircumPoints(float r, double angle, glm::vec3 origin, int faceI
         return glm::vec3(initX, origin.y, initZ);
     }
 }
+
 int axisRotation = 0;
 int len = 3;
 float radiusCorner = 0.71;
@@ -140,11 +145,47 @@ glm::vec3 axisRotationHandler()
 
 int cubitoId = 0;
 int camadaId = 0;
+
+
+struct AnimationHandler {
+    bool running;
+    float speed;
+    glm::vec3 increments;
+    glm::vec3 currState;
+    glm::vec3 initState;
+    glm::vec3 finalState;
+    AnimationHandler() {
+        running = false;
+    };
+    void computeIncrements()
+    {
+        glm::vec3 increments = (finalState - initState) * speed;
+    }
+    void setAnimation(glm::vec3 initPos, glm::vec3 finalPos, float _speed)
+    {
+        initState = initPos;
+        finalState = finalPos;
+        currState = initState;
+        speed = 1 / _speed;
+        computeIncrements();
+    }
+    void execute()
+    {
+        if (currState == initState) running = true;
+        if (running) {
+            currState += increments;
+            if (currState == finalState) running = false;
+        }
+    }
+};
+
 struct cubito {
     unsigned int VBO, VAO;
     vector<glm::vec3 > colors;
     glm::vec3 position;
     glm::vec3 translation;
+    glm::vec3 animation;
+    AnimationHandler ah;
     float angle;
     int id;
     int c_id;
@@ -157,6 +198,7 @@ struct cubito {
         position = _position;
         angle = 0;
         translation = glm::vec3(0.0f, 0.0f, 0.0f);
+        animation = glm::vec3(0.0f, 0.0f, 0.0f);
 
         glGenBuffers(1, &VBO);
         glGenVertexArrays(1, &VAO);
@@ -189,6 +231,40 @@ struct cubito {
             return position;
         }
         return translation;
+<<<<<<< HEAD
+=======
+    }
+    void setAnimationVector(glm::vec3 animationVector)
+    {
+        ah.setAnimation(position, animationVector, 0.3);
+    }
+    bool isAnimationRunning() {
+        return ah.running;
+    }
+    glm::vec3 getAnimationVector()
+    {
+        ah.execute();
+        return ah.currState;
+    }
+
+    string getColors(int colorIdx)
+    {
+        if (colors[colorIdx] == orange)
+            return "U";
+        if (colors[colorIdx] == blue)
+            return "R";
+        if (colors[colorIdx] == white)
+            return "F";
+        if (colors[colorIdx] == green)
+            return "L";
+        if (colors[colorIdx] == red)
+            return "D";
+        if (colors[colorIdx] == yellow)
+            return "B";
+        else {
+            return "-";
+        }
+>>>>>>> f15ec4a9875ff51d3a59757c4f77f5a8752faf1e
     }
 };
 
@@ -220,7 +296,7 @@ struct Face {
         _type = type;
         type++;
     }
-    void buildFace( vector<camada>& vc)
+    void buildFace(vector<camada>& vc)
     {
         for (int i = 0; i < 9; i++)
         {
@@ -235,15 +311,7 @@ struct Face {
     }
 };
 
-void swapCubitoColors(vv3& colors)
-{
-    vv3 tmp = colors;
-    for (int i = 0; i < 4; i++)
-    {
-        pair<int, int> indexes = FColorRotation[i];
-        colors[indexes.second] = tmp[indexes.first];
-    }
-}
+
 
 void swapCubieColors(vv3& colors, int faceId)
 {
@@ -255,23 +323,12 @@ void swapCubieColors(vv3& colors, int faceId)
     }
 }
 
-void swapCamadaColors(camada& target)
-{
-    camada tmp = target;
-    for (int i = 0; i < 8; i++)
-    {
-        pair<int, int> indexes = FswapDirectives[i];
-        target.arr[indexes.first].colors = tmp.arr[indexes.second].colors;
-        //swapCubitoColors(target.arr[indexes.first].colors);
-        target.arr[indexes.first].reset();
-    }
-}
 
 
 void swapFaceColors(Face& target, int faceId)
 {
     vector<cubito> tmp;
-    
+
     for (int i = 0; i < 9; i++)
     {
         tmp.push_back(*target.cubies[i]);
@@ -282,7 +339,7 @@ void swapFaceColors(Face& target, int faceId)
         pair<int, int> indexes = allDirectives[faceId][i];
         target.cubies[indexes.first]->colors = tmp[indexes.second].colors;
         target.cubies[indexes.first]->id = tmp[indexes.second].id;
-        swapCubieColors(target.cubies[indexes.first]->colors,faceId);
+        swapCubieColors(target.cubies[indexes.first]->colors, faceId);
         target.cubies[indexes.first]->reset();
     }
     target.cubies[4]->reset();
@@ -337,8 +394,16 @@ struct Cube
                 unsigned int currCubitoModelLoc = glGetUniformLocation(shaderP, "model");
                 unsigned int colLoc = glGetUniformLocation(shaderP, "ourColor");
 
-                currCubitoModel = glm::rotate(currCubitoModel, glm::radians(camadasCube[i].arr[e].angle), axisRotationHandler());
-                
+                bool animationRunning = camadasCube[i].arr[e].isAnimationRunning();
+
+                if (!animationRunning) {
+                    currCubitoModel = glm::rotate(currCubitoModel, glm::radians(camadasCube[i].arr[e].angle), axisRotationHandler());
+                }
+                else {
+                    cout << "Running" << '\n';
+                    currCubitoModel = glm::translate(currCubitoModel, camadasCube[i].arr[e].getAnimationVector());
+                }
+
                 glUniformMatrix4fv(currCubitoModelLoc, 1, GL_FALSE, &currCubitoModel[0][0]);
                 glBindVertexArray(camadasCube[i].arr[e].VAO);
                 int a = 0;
@@ -357,22 +422,35 @@ struct Cube
         }
     }
 };
+// DÍA DEL EXAMEN FINAL
+// RETOS:
+// 1. RESPIRAR
+// 2. QUE SE ARME SOLO
+// 3. CUBO DE CUBOS
+
+// PARA EL JUEVES AVANCE
+
+// PARA EL EXÁMEN:
+// PRIMITIVAS DE TEXTURA
+// 
 
 double angle = 0;
 double angleLimit = 89.0f;
-double increment = 2;
-std::vector<std::string> fnames = {"FRONT","BACK","LEFT","RIGHT","UP","DOWN"};
+double increment = 5;
+std::vector<std::string> fnames = { "FRONT","BACK","LEFT","RIGHT","UP","DOWN" };
 struct CubeController {
     queue<int> rotationsQueue;
     Cube* cube;
-    vector<camada> *camadasCube;
-
+    vector<camada>* camadasCube;
+    vector<string> input;
+    vector<string> output;
     vector<Face> faces;
 
     CubeController() {
         cube = nullptr;
         camadasCube = nullptr;
         faces.resize(6);
+        input.resize(21);
     }
     void setCubo(Cube& _cube)
     {
@@ -380,28 +458,16 @@ struct CubeController {
         cube = &_cube;
         for (auto& face : faces)
             face.buildFace(*camadasCube);
+        //printFaces();
+        setInput();
+        printInput();
     }
-    void camadaRotation(double angle, int axis) {
-        camada * camada = &cube->camadasCube[axis];
-        glm::vec3 origin = camada->arr[4].position;
 
-        camada->arr[0].setRotation(computeCircumPoints(radiusCorner, angle + 225, origin), angle);
-        camada->arr[2].setRotation(computeCircumPoints(radiusCorner, angle + 315, origin), angle);
-        camada->arr[6].setRotation(computeCircumPoints(radiusCorner, angle + 135, origin), angle);
-        camada->arr[8].setRotation(computeCircumPoints(radiusCorner, angle + 45, origin), angle);
-
-        camada->arr[4].setRotation(computeCircumPoints(radiusCenter, angle, origin), angle);
-
-        camada->arr[1].setRotation(computeCircumPoints(radiusEdge, angle + 270, origin), angle);
-        camada->arr[3].setRotation(computeCircumPoints(radiusEdge, angle + 180, origin), angle);
-        camada->arr[5].setRotation(computeCircumPoints(radiusEdge, angle, origin), angle);
-        camada->arr[7].setRotation(computeCircumPoints(radiusEdge, angle + 90, origin), angle);
-    }
 
     void faceRotation(double angle, int faceId)
     {
         v3 origin = faces[faceId].cubies[4]->position;
-        vector<cubito*> *currCubies = &faces[faceId].cubies;
+        vector<cubito*>* currCubies = &faces[faceId].cubies;
         auto sum = allAngleSums[faceId];
         /*for (int i = 0; i < 9; i++)
         {
@@ -413,19 +479,19 @@ struct CubeController {
         faces[faceId].cubies[6]->setRotation(computeCircumPoints(radiusCorner, angle + sum[6], origin, faceId), angle);
         faces[faceId].cubies[8]->setRotation(computeCircumPoints(radiusCorner, angle + sum[8], origin, faceId), angle);
 
-        faces[faceId].cubies[4]->setRotation(computeCircumPoints(radiusCenter, angle, origin, faceId), angle);
+        faces[faceId].cubies[4]->setRotation(computeCircumPoints(radiusCenter, angle + sum[4], origin, faceId), angle);
 
         faces[faceId].cubies[1]->setRotation(computeCircumPoints(radiusEdge, angle + sum[1], origin, faceId), angle);
         faces[faceId].cubies[3]->setRotation(computeCircumPoints(radiusEdge, angle + sum[3], origin, faceId), angle);
-        faces[faceId].cubies[5]->setRotation(computeCircumPoints(radiusEdge, angle+ sum[5], origin, faceId), angle);
+        faces[faceId].cubies[5]->setRotation(computeCircumPoints(radiusEdge, angle + sum[5], origin, faceId), angle);
         faces[faceId].cubies[7]->setRotation(computeCircumPoints(radiusEdge, angle + sum[7], origin, faceId), angle);
     }
 
     void printFaces() {
-        std::cout << "-----------------------------------------------------------------"<<'\n';
+        std::cout << "-----------------------------------------------------------------" << '\n';
         int j = 0;
         for (auto& face : faces) {
-            std::cout << fnames[j] <<'\n';
+            std::cout << fnames[j] << '\n';
             int i = 1;
             for (auto& cubie : face.cubies)
             {
@@ -434,7 +500,7 @@ struct CubeController {
                     //std::cout << cubie->id << "(" << cubie->c_id << ") ";
                 }
                 else {
-                    std::cout << cubie->id <<" ";
+                    std::cout << cubie->id << " ";
                 }
 
                 i++;
@@ -442,8 +508,7 @@ struct CubeController {
             j++;
             std::cout << '\n';
         }
-        std::cout << "-----------------------------------------------------------------"<<'\n';
-
+        std::cout << "-----------------------------------------------------------------" << '\n';
     }
 
     void clearRotation()
@@ -454,10 +519,97 @@ struct CubeController {
             camada->arr[i].reset();
         }
     }
-   
-    void setRotationFlag(int newFlag)
-    { 
-        rotationsQueue.push(newFlag);
+
+    void setRotationFlag(int newFlag, int times = 1)
+    {
+        for (int i = 0; i < times; i++)
+        {
+            rotationsQueue.push(newFlag);
+        }
+    }
+    void printInput()
+    {
+        cout << "State: ";
+        for (int i = 0; i < 20; i++)
+            cout << input[i + 1] << " ";
+        cout << '\n';
+    }
+    void setInput()
+    {
+        // frontFace 0, backFace 1, leftFace 2 , rightFace 3, upFace 4, downFace 5
+        //En U -> 6 7 8 15 16 17 24 25 26
+        //Indices:  1   3     5     7 
+        //Orden: 1 - 5 - 7 - 3
+        //En D -> 1 - 5 - 7 - 3
+        //Middle -> F(5) - F(3) - B(5) - B(3)
+
+        //En U -> 0 - 2 - 6 - 8
+        //En D -> 0 - 2 - 6 - 8
+        // 0 6 8 2
+
+        vector<cubito*> state = {
+            //Borders up
+            faces[4].cubies[1],
+            faces[4].cubies[5],
+            faces[4].cubies[7],
+            faces[4].cubies[3],
+            // Borders down
+            faces[5].cubies[1],
+            faces[5].cubies[5],
+            faces[5].cubies[7],
+            faces[5].cubies[3],
+            // Middle
+            faces[0].cubies[5],
+            faces[0].cubies[3],
+            faces[1].cubies[5],
+            faces[1].cubies[3],
+            // Corners UP
+            faces[4].cubies[2],
+            faces[4].cubies[8],
+            faces[4].cubies[6],
+            faces[4].cubies[0],
+            // Corners Down
+            faces[5].cubies[2],
+            faces[5].cubies[0],
+            faces[5].cubies[6],
+            faces[5].cubies[8]
+        };
+        //  B(0)    F(1)   L(2)   R(3)  D(4)  U(5)
+        vector<vector<int>> colorIndexes = {
+            //Borders up
+            {5, 1},
+            {5, 3},
+            {5, 0},
+            {5, 2},
+            // Borders down
+            {4, 1},
+            {4, 3},
+            {4, 0},
+            {4, 2},
+            // Middle
+            {1, 3},
+            {1, 2},
+            {0, 3},
+            {0, 2},
+            // Corners UP
+            {5, 1, 3},
+            {5, 3, 0},
+            {5, 0, 2},
+            {5, 2, 1},
+            // Corners Down
+            {4, 3, 1},
+            {4, 1, 2},
+            {4, 2, 0},
+            {4, 0, 3}
+        };
+
+
+        for (int i = 0; i < 20; i++) {
+            input[i + 1] = "";
+            for (auto& j : colorIndexes[i]) {
+                input[i + 1].append(state[i]->getColors(j));
+            }
+        }
     }
 
     void rotationHandler()
@@ -466,7 +618,7 @@ struct CubeController {
         {
             faceRotation(angle, rotationsQueue.front());
             axisRotation = rotationsQueue.front();
-            
+
             if (angle <= angleLimit) {
                 angle += increment;
             }
@@ -474,20 +626,74 @@ struct CubeController {
                 angle = 0;
                 swapFaceColors(faces[rotationsQueue.front()], rotationsQueue.front());
                 rotationsQueue.pop();
-                printFaces();
             }
+        }
+    }
+    vector<glm::vec3> animationVectors = {
+    glm::vec3(0,0.4,0)
+    };
+
+    vector<vector<int>> animationDirectives = {
+        //camada, indexCubo, vector
+        {0, 1, 0}
+    };
+
+    void animate()
+    {
+        cout << "Animate" << '\n';
+        int n = animationDirectives.size();
+        for (int i = 0; i < n; i++)
+        {
+            int indexCamada = animationDirectives[i][0];
+            int indexCubito = animationDirectives[i][1];
+            int indexVector = animationDirectives[i][2];
+
+            cube->camadasCube[indexCamada].arr[indexCubito].setAnimationVector(animationVectors[indexVector]);
         }
     }
     void solve()
     {
-        vector<string> input = { "RU", "LF", "UB", "DR", "DL", "BL", "UL", "FU", "BD", "RF", "BR", "FD", "LDF", "LBD", "FUL", "RFD", "UFR", "RDB", "UBL", "RBU" };
-        solver(input);
+        setInput();
+        printInput();
+        cout << "Solution: ";
+        output.clear();
+        solver(input, output);
+        cout << '\n';
+
+        // front(0)  back(1) left(2) right(3) up(4) down(5)
+        for (string& mov : output)
+        {
+            if (mov == "R1") setRotationFlag(3, 3);
+            else if (mov == "R2") setRotationFlag(3, 2);
+            else if (mov == "R3") setRotationFlag(3);
+
+            else if (mov == "U1") setRotationFlag(4, 3);
+            else if (mov == "U2") setRotationFlag(4, 2);
+            else if (mov == "U3") setRotationFlag(4);
+
+            else if (mov == "F1") setRotationFlag(0, 3);
+            else if (mov == "F2") setRotationFlag(0, 2);
+            else if (mov == "F3") setRotationFlag(0);
+
+            else if (mov == "L1") setRotationFlag(2);
+            else if (mov == "L2") setRotationFlag(2, 2);
+            else if (mov == "L3") setRotationFlag(2, 3);
+
+            else if (mov == "B1") setRotationFlag(1);
+            else if (mov == "B2") setRotationFlag(1, 2);
+            else if (mov == "B3") setRotationFlag(1, 3);
+
+            else if (mov == "D1") setRotationFlag(5);
+            else if (mov == "D2") setRotationFlag(5, 2);
+            else if (mov == "D3") setRotationFlag(5, 3);
+        }
     }
 };
 
+
 void handleAngle(double& angle)
 {
-    angle = angle < angleLimit ? angle+=increment : 0;
+    angle = angle < angleLimit ? angle += increment : 0;
 }
 CubeController cubeController;
 
@@ -613,10 +819,10 @@ int main() {
     Cube cube = Cube(shaderProgram);
     cubeController.setCubo(cube);
 
-    while (!glfwWindowShouldClose(window)){
+    while (!glfwWindowShouldClose(window)) {
         processInput(window);
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         cube.draw();
         cubeController.rotationHandler();
@@ -676,6 +882,10 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     if (key == GLFW_KEY_S && action == GLFW_PRESS)
     {
         cubeController.solve();
+    }
+    if (key == GLFW_KEY_A && action == GLFW_PRESS)
+    {
+        cubeController.animate();
     }
     if (key == 93 && action == GLFW_PRESS)
     {

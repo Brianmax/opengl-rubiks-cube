@@ -23,7 +23,7 @@ using namespace std;
 
 typedef vector<int> cubestate;
 
-int applicableMoves[] = {0, 262143, 259263, 74943, 74898};
+int applicableMoves[] = { 0, 262143, 259263, 74943, 74898 };
 
 int affectedCubies[][8] = {
     {0, 1, 2, 3, 0, 1, 2, 3},   // U
@@ -49,7 +49,7 @@ cubestate applyMove(int move, cubestate state)
             int target = affectedCubies[face][i] + isCorner * 12;
             int killer = affectedCubies[face][(i & 3) == 3 ? i - 3 : i + 1] + isCorner * 12;
             int orientationDelta = (i < 4) ? (face > 1 && face < 4) : (face < 2) ? 0
-                                                                                 : 2 - (i & 1);
+                : 2 - (i & 1);
 
             state[target] = oldState[killer];
             state[target + 20] = oldState[killer + 20] + orientationDelta;
@@ -102,15 +102,18 @@ cubestate id(cubestate state)
     return state;
 }
 
-void solver(vector<string> input)
+void solver(vector<string>input, vector<string>& output)
 {
+
+    // Recibe
     //--- Define the goal.
-    string goal[] = {"UF", "UR", "UB", "UL", "DF", "DR", "DB", "DL", "FR", "FL", "BR", "BL",
-                     "UFR", "URB", "UBL", "ULF", "DRF", "DFL", "DLB", "DBR"};
+    phase = 0;
+    string goal[] = { "UF", "UR", "UB", "UL", "DF", "DR", "DB", "DL", "FR", "FL", "BR", "BL",
+                     "UFR", "URB", "UBL", "ULF", "DRF", "DFL", "DLB", "DBR" };
 
     //--- Prepare current (start) and goal state.
     cubestate currentState(40), goalState(40);
-    for (int i = 0; i < 19; i++)
+    for (int i = 0; i < 20; i++)
     {
         //--- Goal state.
         goalState[i] = i;
@@ -147,11 +150,12 @@ void solver(vector<string> input)
         //--- Dance the funky bidirectional BFS...
         while (1)
         {
+
             //--- Get state from queue, compute its ID and get its direction.
             cubestate oldState = q.front();
             q.pop();
             cubestate oldId = id(oldState);
-            int &oldDir = direction[oldId];
+            int& oldDir = direction[oldId];
 
             //--- Apply all applicable moves to it and handle the new state.
             for (int move = 0; move < 18; move++)
@@ -162,7 +166,7 @@ void solver(vector<string> input)
                     //--- Apply the move.
                     cubestate newState = applyMove(move, oldState);
                     cubestate newId = id(newState);
-                    int &newDir = direction[newId];
+                    int& newDir = direction[newId];
 
                     //--- Have we seen this state (id) from the other direction already?
                     //--- I.e. have we found a connection?
@@ -192,7 +196,9 @@ void solver(vector<string> input)
                         //--- Print and apply the algorithm.
                         for (int i = 0; i < (int)algorithm.size(); i++)
                         {
-                            cout << "UDFBLR"[algorithm[i] / 3] << algorithm[i] % 3 + 1;
+                            string movement = ("UDFBLR"[algorithm[i] / 3]) + (to_string(algorithm[i] % 3 + 1));
+                            output.push_back(movement);
+                            cout << movement << " ";
                             currentState = applyMove(algorithm[i], currentState);
                         }
 

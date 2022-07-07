@@ -98,7 +98,6 @@ vector<unsigned int> whiteT={textures2[51], textures2[52], textures2[53], textur
 // [ w4 ] [ w5 ] [ w6 ]
 // [ w1 ] [ w2 ] [ w3 ]
 
-
 vector< vector <unsigned int> > texturesFront {
         //  B      F     L     R      D     U
         {blackT,  M7,  u1,  blackT,   g1, blackT},

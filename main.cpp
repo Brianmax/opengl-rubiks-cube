@@ -116,7 +116,7 @@ void Increment()
 // 8 restantes - esquinas
 string initialCube[] = { "UF", "UR", "UB", "UL", "DF", "DR", "DB", "DL", "FR", "FL", "BR", "BL", "UFR", "URB", "UBL", "ULF", "DRF", "DFL", "DLB", "DBR" };
 
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 2.0f);
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 6.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 // timing  
@@ -892,7 +892,7 @@ struct CubeController {
 
     void assemble()
     {
-        cout << "Efecto" << '\n';
+        //cout << "Efecto" << '\n';
         int k = 0;
         for (int i = 0; i < 3; i++)
         {
@@ -950,6 +950,19 @@ struct CubeController {
     }
 };
 
+void menu()
+{
+    cout << "------------------Simulacion Cubo de Rubik-----------------------" << endl;
+    cout << "[2] Ensamblar el cubo" << endl;
+    cout << "[1] Animacion de respiro" << endl;
+    cout << "[N] Animación de la camara en espiral" << endl;
+    cout << "[X] Animacion de la camara en el eje X" << endl;
+    cout << "[Y] Animacion de la camara en el eje Y" << endl;
+    cout << "[F][B][R][L][U][D] Permutaciones del cubo" << endl;
+    cout << "[S] Resolver el cubo" << endl;
+    cout << "[M] Mostrar el menu" << endl;
+    cout << "-----------------------------------------------------------------" << endl;
+}
 
 void handleAngle(double& angle)
 {
@@ -977,9 +990,18 @@ int main() {
     }
     glViewport(0, 0, 800, 600);
 
-    cout << "------------------Simulacion cubo de rubik-----------------------"<<endl;
-    cout << "Presione 2 para ensamblar el cubo" << endl;
-    cout << "Presione 1 para para la animacion de respiro" <<  endl;
+    cout << "------------------Simulacion Cubo de Rubik-----------------------"<<endl;
+    cout << "[2] Ensamblar el cubo" << endl;
+    cout << "[1] Animacion de respiro" << endl;
+    cout << "[N] Animación de la camara en espiral" << endl;
+    cout << "[X] Animacion de la camara en el eje X" << endl;
+    cout << "[Y] Animacion de la camara en el eje Y" << endl;
+    cout << "[F][B][R][L][U][D] Permutaciones del cubo" <<  endl;
+    cout << "[S] Resolver el cubo" << endl;
+    cout << "[M] Mostrar el menu" << endl;
+    cout << "-----------------------------------------------------------------" << endl;
+
+
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     //glfwSetCursorPosCallback(window, mouse_callback);
@@ -1060,7 +1082,7 @@ int main() {
         // load image, create texture and generate mipmaps
         int width, height, nrChannels;
         //string tmp = "./image" + to_string(i + 1) + ".jpg";
-        string tmp = "./img" + to_string(i + 1) + ".jpg";
+        string tmp = "./img/img" + to_string(i + 1) + ".jpg";
         //cout << "File: " << tmp << "    "<< textures2[i] << endl;
         stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
         unsigned char *data = stbi_load(tmp.c_str(), &width, &height, &nrChannels, 0);
@@ -1085,7 +1107,7 @@ int main() {
 
     while (!glfwWindowShouldClose(window)) {
         processInput(window);
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         cube.draw();
@@ -1147,6 +1169,10 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     if (key == GLFW_KEY_S && action == GLFW_PRESS)
     {
         cubeController.solve();
+    }
+    if (key == GLFW_KEY_M && action == GLFW_PRESS)
+    {
+        menu();
     }
     if (key == 49 && action == GLFW_PRESS)
     {

@@ -55,13 +55,63 @@ float lastY = 600.0 / 2.0;
 float fov = 45.0f;
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
-
+bool breathKey = false;
 //enum class rotation { front, back, down, up, right, left };
 int rotation = 0;
 bool bussy = false;
 
+vector<glm::vec3> breateAnimationVectors2 = {
+        glm::vec3(-0.1,-0.1,0.1), glm::vec3(0,-0.1,0.1), glm::vec3(0.1,-0.1,0.1),
+        glm::vec3(-0.1,0,0.1), glm::vec3(0,0,0.1), glm::vec3(0.1, 0,0.1),
+        glm::vec3(-0.1,0.1,0.1), glm::vec3(0,0.1,0.1), glm::vec3(0.1,0.1,0.1),
 
+        glm::vec3(-0.1,-0.1,0), glm::vec3(0,-0.1,0), glm::vec3(0.1,-0.1,0),
+        glm::vec3(-0.1,0,0), glm::vec3(0,0,0), glm::vec3(0.1,0,0),
+        glm::vec3(-0.1,0.1,0), glm::vec3(0,0.1,0), glm::vec3(0.1,0.1,0),
 
+        glm::vec3(-0.1,-0.1,-0.1), glm::vec3(0,-0.1,-0.1), glm::vec3(0.1,-0.1,-0.1),
+        glm::vec3(-0.1,0,-0.1), glm::vec3(0,0,-0.1), glm::vec3(0.1, 0,-0.1),
+        glm::vec3(-0.1,0.1,-0.1), glm::vec3(0,0.1,-0.1), glm::vec3(0.1,0.1,-0.1)
+};
+double vecx = 0;
+double vecy = 0;
+double vecz = 0;
+bool tmas = true;
+bool tmenos = false;
+double v = 0;
+void Increment()
+{
+    if(tmas)
+    {
+        v = v + 0.05;
+        for(int i = 0; i < breateAnimationVectors2.size(); i++)
+        {
+            breateAnimationVectors2[i].x = breateAnimationVectors2[i].x + 0.009;
+            breateAnimationVectors2[i].y = breateAnimationVectors2[i].y + 0.009;
+            breateAnimationVectors2[i].z = breateAnimationVectors2[i].z + 0.009;
+        }
+        if(v > 1)
+        {
+            tmas = false;
+            tmenos = true;
+        }
+    }
+    else if(tmenos)
+    {
+        v = v - 0.05;
+        for(int i = 0; i < breateAnimationVectors2.size(); i++)
+        {
+            breateAnimationVectors2[i].x = breateAnimationVectors2[i].x - 0.009;
+            breateAnimationVectors2[i].y = breateAnimationVectors2[i].y - 0.009;
+            breateAnimationVectors2[i].z = breateAnimationVectors2[i].z - 0.009;
+        }
+        if(v < 0.0)
+        {
+            tmas = true;
+            tmenos = false;
+        }
+    }
+}
 // 12 primeros - bordes
 // 8 restantes - esquinas
 string initialCube[] = { "UF", "UR", "UB", "UL", "DF", "DR", "DB", "DL", "FR", "FL", "BR", "BL", "UFR", "URB", "UBL", "ULF", "DRF", "DFL", "DLB", "DBR" };
@@ -156,7 +206,6 @@ struct AnimationHandler {
     glm::vec3 currState;
     glm::vec3 initState;
     glm::vec3 finalState;
-
     AnimationHandler() {
         currState = glm::vec3(0, 0, 0);
         initState = glm::vec3(0, 0, 0);
@@ -218,9 +267,8 @@ struct AnimationHandler {
 };
 bool checkIndex(vector<unsigned int> p, unsigned int index)
 {
-    for (auto i : p) 
+    for(auto i : p)
         if (i == index) return true;
-  
     return false;
 }
 struct cubito {
@@ -377,6 +425,38 @@ void swapFaceColors(Face& target, int faceId)
     }
     target.cubies[4]->reset();
 }
+double scaleX = 0;
+double scaleY = 0;
+double scaleZ = 0;
+double var = 0;
+bool upperLimit = true;
+bool lowerLimit = false;
+void scaleVar()
+{
+    if(upperLimit)
+    {
+        var = var + 0.001;
+        scaleX = var;
+        scaleY = var;
+        scaleZ= var;
+        if(var > 0.9) {
+            upperLimit = false;
+            lowerLimit = true;
+        }
+    }
+    else if(lowerLimit)
+    {
+        var = var - 0.001;
+        scaleX = var;
+        scaleY = var;
+        scaleZ = var;
+        if (var < 0.5)
+        {
+            lowerLimit = false;
+            upperLimit = true;
+        }
+    }
+}
 struct Cube
 {
     unsigned int shaderP;
@@ -427,16 +507,23 @@ struct Cube
                 unsigned int colLoc = glGetUniformLocation(shaderP, "texture1");
 
                 bool animationRunning = camadasCube[i].arr[e].isAnimationRunning();
-
                 if (!animationRunning) {
                     currCubitoModel = glm::rotate(currCubitoModel, glm::radians(camadasCube[i].arr[e].angle), axisRotationHandler());
                 }
                 else {
                     //cout << "Running" << '\n';
                     //currCubitoModel = glm::mat4(1.0f);
-                    currCubitoModel = glm::translate(currCubitoModel, camadasCube[i].arr[e].getAnimationVector());
-                }
+                    scaleVar();
+                    Increment();
+                    //cout << scaleX << "   " << scaleY << "   "<< scaleZ << endl;
+                    currCubitoModel = glm::scale(currCubitoModel, glm::vec3(scaleX, scaleY, scaleZ));
+                    //currCubitoModel = glm::translate(currCubitoModel, camadasCube[i].arr[e].getAnimationVector());
+                    cout << " Este es v " << v << endl;
+                    glm::vec3 currentVector = breateAnimationVectors2[e];
+                    cout << currentVector.x<< "  " << currentVector.y << "  " << currentVector.z << endl;
+                    currCubitoModel = glm::translate(currCubitoModel, breateAnimationVectors2[e]);
 
+                }
                 glUniformMatrix4fv(currCubitoModelLoc, 1, GL_FALSE, &currCubitoModel[0][0]);
                 glBindVertexArray(camadasCube[i].arr[e].VAO);
                 int a = 0;
@@ -668,17 +755,17 @@ struct CubeController {
         //printInput();
     }
     vector<glm::vec3> breateAnimationVectors = {
-        glm::vec3(-0.1,-0.1,0.1), glm::vec3(0,-0.1,0.1), glm::vec3(0.1,-0.1,0.1),
-        glm::vec3(-0.1,0,0.1), glm::vec3(0,0,0.1), glm::vec3(0.1, 0,0.1),
-        glm::vec3(-0.1,0.1,0.1), glm::vec3(0,0.1,0.1), glm::vec3(0.1,0.1,0.1),
+            glm::vec3(-0.1,-0.1,0.1), glm::vec3(0,-0.1,0.1), glm::vec3(0.1,-0.1,0.1),
+            glm::vec3(-0.1,0,0.1), glm::vec3(0,0,0.1), glm::vec3(0.1, 0,0.1),
+            glm::vec3(-0.1,0.1,0.1), glm::vec3(0,0.1,0.1), glm::vec3(0.1,0.1,0.1),
 
-        glm::vec3(-0.1,-0.1,0), glm::vec3(0,-0.1,0), glm::vec3(0.1,-0.1,0),
-        glm::vec3(-0.1,0,0), glm::vec3(0,0,0), glm::vec3(0.1,0,0),
-        glm::vec3(-0.1,0.1,0), glm::vec3(0,0.1,0), glm::vec3(0.1,0.1,0),
+            glm::vec3(-0.1,-0.1,0), glm::vec3(0,-0.1,0), glm::vec3(0.1,-0.1,0),
+            glm::vec3(-0.1,0,0), glm::vec3(0,0,0), glm::vec3(0.1,0,0),
+            glm::vec3(-0.1,0.1,0), glm::vec3(0,0.1,0), glm::vec3(0.1,0.1,0),
 
-        glm::vec3(-0.1,-0.1,-0.1), glm::vec3(0,-0.1,-0.1), glm::vec3(0.1,-0.1,-0.1),
-        glm::vec3(-0.1,0,-0.1), glm::vec3(0,0,-0.1), glm::vec3(0.1, 0,-0.1),
-        glm::vec3(-0.1,0.1,-0.1), glm::vec3(0,0.1,-0.1), glm::vec3(0.1,0.1,-0.1),
+            glm::vec3(-0.1,-0.1,-0.1), glm::vec3(0,-0.1,-0.1), glm::vec3(0.1,-0.1,-0.1),
+            glm::vec3(-0.1,0,-0.1), glm::vec3(0,0,-0.1), glm::vec3(0.1, 0,-0.1),
+            glm::vec3(-0.1,0.1,-0.1), glm::vec3(0,0.1,-0.1), glm::vec3(0.1,0.1,-0.1)
     };
 
     vector<glm::vec3> fallAnimationVectors = {
@@ -911,7 +998,8 @@ int main() {
 
         cube.draw();
         cubeController.rotationHandler();
-
+        if(breathKey)
+            cubeController.breath();
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
@@ -970,7 +1058,10 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     }
     if (key == 49 && action == GLFW_PRESS)
     {
-        cubeController.breath();
+        if(breathKey)
+            breathKey = false;
+        else
+            breathKey = true;
     }
     if (key == 50 && action == GLFW_PRESS)
     {

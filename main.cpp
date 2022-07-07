@@ -977,7 +977,9 @@ int main() {
     }
     glViewport(0, 0, 800, 600);
 
-
+    cout << "------------------Simulacion cubo de rubik-----------------------"<<endl;
+    cout << "Presione 2 para ensamblar el cubo" << endl;
+    cout << "Presione 1 para para la animacion de respiro" <<  endl;
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     //glfwSetCursorPosCallback(window, mouse_callback);

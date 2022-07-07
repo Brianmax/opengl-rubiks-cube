@@ -13,12 +13,12 @@ using namespace std;
 
 unsigned int textures2[54] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54};
 //c
-vector<unsigned int> orangeT={textures2[6],textures2[7],textures2[8],textures2[3],textures2[4],textures2[5],textures2[0],textures2[1],textures2[2]};
+vector<unsigned int> whiteT={textures2[6],textures2[7],textures2[8],textures2[3],textures2[4],textures2[5],textures2[0],textures2[1],textures2[2]};
 vector<unsigned int> yellowT={textures2[15],textures2[16],textures2[17],textures2[12],textures2[13],textures2[14],textures2[9],textures2[10],textures2[11]};
 vector<unsigned int> blueT={textures2[33],textures2[34],textures2[35],textures2[30],textures2[31],textures2[32],textures2[27],textures2[28],textures2[29]};
 vector<unsigned int> redT={textures2[24],textures2[25],textures2[26],textures2[21],textures2[22],textures2[23],textures2[18],textures2[19],textures2[20]};
-vector<unsigned int> greenT={textures2[36],textures2[37],textures2[38],textures2[39],textures2[40],textures2[41],textures2[42],textures2[43],textures2[44]};
-vector<unsigned int> whiteT={textures2[51], textures2[52], textures2[53], textures2[48], textures2[49] , textures2[50] , textures2[45] , textures2[46] , textures2[47]};
+vector<unsigned int> orangeT={textures2[36],textures2[37],textures2[38],textures2[39],textures2[40],textures2[41],textures2[42],textures2[43],textures2[44]};
+vector<unsigned int> greenT={textures2[51], textures2[52], textures2[53], textures2[48], textures2[49] , textures2[50] , textures2[45] , textures2[46] , textures2[47]};
 
 // 1 - 9 -> orange
 // 10 - 18 -> yellow
@@ -102,7 +102,7 @@ vector< vector <unsigned int> > texturesFront {
         //  B      F     L     R      D     U
         {blackT,  M7,  u1,  blackT,   g1, blackT},
         {blackT,  M8, blackT, blackT, g2, blackT},
-        {blackT,  M3, blackT, P1,     g3, blackT},
+        {blackT,  M9, blackT, P1,     g3, blackT},
 
         {blackT, M4,   u4,  blackT, blackT, blackT},
         {blackT, M5, blackT, blackT, blackT, blackT},
@@ -110,7 +110,7 @@ vector< vector <unsigned int> > texturesFront {
 
         {blackT, M1, u7, blackT, blackT, s1},
         {blackT, M2, blackT, blackT, blackT, s2},
-        {blackT, M9, blackT, P7, blackT, s3}
+        {blackT, M3, blackT, P7, blackT, s3}
 };
 
 typedef vector<vector<unsigned int >> vv;

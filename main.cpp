@@ -883,7 +883,7 @@ int main() {
         // load image, create texture and generate mipmaps
         int width, height, nrChannels;
         //string tmp = "./image" + to_string(i + 1) + ".jpg";
-        string tmp = "./img/img" + to_string(i + 1) + ".jpg";
+        string tmp = "./img" + to_string(i + 1) + ".jpg";
         //cout << "File: " << tmp << "    "<< textures2[i] << endl;
         stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
         unsigned char *data = stbi_load(tmp.c_str(), &width, &height, &nrChannels, 0);

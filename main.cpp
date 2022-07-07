@@ -178,10 +178,19 @@ struct AnimationHandler {
         }
     }
 };
-
+bool checkIndex(vector<unsigned int> p, unsigned int index)
+{
+    for(int i=0; i < p.size(); i++)
+    {
+        if (p[i] == index)
+            return true;
+    }
+    return false;
+}
 struct cubito {
     unsigned int VBO, VAO;
     vector<glm::vec3 > colors;
+    vector<unsigned int> textures;
     glm::vec3 position;
     glm::vec3 translation;
     glm::vec3 animation;
@@ -189,17 +198,16 @@ struct cubito {
     float angle;
     int id;
     int c_id;
-    cubito(vector<glm::vec3> _colors, glm::vec3 _position)
+    cubito(vector<unsigned int> _textures, glm::vec3 _position)
     {
         c_id = camadaId;
         id = cubitoId;
         cubitoId++;
-        colors = _colors;
+        textures = _textures;
         position = _position;
         angle = 0;
         translation = glm::vec3(0.0f, 0.0f, 0.0f);
         animation = glm::vec3(0.0f, 0.0f, 0.0f);
-
         glGenBuffers(1, &VBO);
         glGenVertexArrays(1, &VAO);
         glBindVertexArray(VAO);
@@ -207,12 +215,8 @@ struct cubito {
         glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), cube_vertices, GL_STATIC_DRAW);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
-
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
         glEnableVertexAttribArray(1);
-        //glBindBuffer(GL_ARRAY_BUFFER, 0);
-        //glBindVertexArray(0);
-        //glBindVertexArray(0);
     }
     void setRotation(glm::vec<3, float> _translation, float _angle)
     {
@@ -231,8 +235,6 @@ struct cubito {
             return position;
         }
         return translation;
-<<<<<<< HEAD
-=======
     }
     void setAnimationVector(glm::vec3 animationVector)
     {
@@ -249,34 +251,37 @@ struct cubito {
 
     string getColors(int colorIdx)
     {
-        if (colors[colorIdx] == orange)
-            return "U";
-        if (colors[colorIdx] == blue)
-            return "R";
-        if (colors[colorIdx] == white)
-            return "F";
-        if (colors[colorIdx] == green)
-            return "L";
-        if (colors[colorIdx] == red)
-            return "D";
-        if (colors[colorIdx] == yellow)
-            return "B";
+        if (checkIndex(orangeT, textures[colorIdx])){
+            cout << "Estamos en la U" << endl;
+            return "U";}
+        if (checkIndex(blueT, textures[colorIdx])){
+            cout << "Estamos en la R" << endl;
+            return "R";}
+        if (checkIndex(whiteT, textures[colorIdx])){
+            cout << "Estamos en la F" << endl;
+            return "F";}
+        if (checkIndex(greenT, textures[colorIdx])){
+            cout << "Estamos en la L" << endl;
+            return "L";}
+        if (checkIndex(redT, textures[colorIdx])){
+            cout << "Estamos en la D" << endl;
+            return "D";}
+        if (checkIndex(yellowT, textures[colorIdx])){
+            cout << "Estamos en la B" << endl;
+            return "B";}
         else {
             return "-";
         }
->>>>>>> f15ec4a9875ff51d3a59757c4f77f5a8752faf1e
     }
 };
 
-
-
 struct camada {
     vector<cubito> arr;
-    camada(vvv3 camadaColors, vv3 positions)
+    camada(vv camadaTextures, vv3 positions)
     {
         for (int i = 0; i < 9; i++)
         {
-            arr.emplace_back(cubito(camadaColors[i], positions[i]));
+            arr.emplace_back(cubito(camadaTextures[i], positions[i]));
         }
     }
     void reset()
@@ -311,15 +316,13 @@ struct Face {
     }
 };
 
-
-
-void swapCubieColors(vv3& colors, int faceId)
+void swapCubieColors(vector<unsigned int>& textures, int faceId)
 {
-    vv3 tmp = colors;
+    vector<unsigned int> tmp = textures;
     for (int i = 0; i < 4; i++)
     {
         pair<int, int> indexes = colorRotations[faceId][i];
-        colors[indexes.second] = tmp[indexes.first];
+        textures[indexes.second] = tmp[indexes.first];
     }
 }
 
@@ -337,9 +340,9 @@ void swapFaceColors(Face& target, int faceId)
     for (int i = 0; i < 8; i++)
     {
         pair<int, int> indexes = allDirectives[faceId][i];
-        target.cubies[indexes.first]->colors = tmp[indexes.second].colors;
+        target.cubies[indexes.first]->textures = tmp[indexes.second].textures;
         target.cubies[indexes.first]->id = tmp[indexes.second].id;
-        swapCubieColors(target.cubies[indexes.first]->colors, faceId);
+        swapCubieColors(target.cubies[indexes.first]->textures, faceId);
         target.cubies[indexes.first]->reset();
     }
     target.cubies[4]->reset();
@@ -350,17 +353,19 @@ struct Cube
     vector<camada> camadasCube;
     Cube(unsigned int shaderProgram) {
         shaderP = shaderProgram;
+        camada CamadaFront(texturesFront, cubePositionsFront);
 
-        camada CamadaFront(coloresFront, cubePositionsFront);
         //cubitoId = 0;
         camadaId++;
-        camada CamadaMiddle(coloresMiddle, cubePositionsMiddle);
+        camada CamadaMiddle(texturesMiddle, cubePositionsMiddle);
         //cubitoId = 0;
         camadaId++;
-        camada CamadaBack(coloresBack, cubePositionsBack);
+        camada CamadaBack(texturesBack, cubePositionsBack);
+
         camadasCube.push_back(CamadaFront);
         camadasCube.push_back(CamadaMiddle);
         camadasCube.push_back(CamadaBack);
+
     }
     void draw()
     {
@@ -371,17 +376,14 @@ struct Cube
         float camX = sin(glfwGetTime()) * radius;
         float camZ = cos(glfwGetTime()) * radius;
         float camYY = sin(glfwGetTime()) * radius;
-        //glm::mat4 view = glm::lookAt(glm::vec3(camX, camY, camZ),glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
-        glm::mat4 view = glm::lookAt(glm::vec3(camX, 0.0, camZ),glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));7
+        glm::mat4 view = glm::lookAt(glm::vec3(camX, camY, camZ),glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+        //glm::mat4 view = glm::lookAt(glm::vec3(camX, 0.0, camZ),glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
         //glm::mat4 view = glm::lookAt(glm::vec3(0.0, camYY, camZ),glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
-
         //glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-
         unsigned int viewLoc = glGetUniformLocation(shaderP, "view");
         unsigned int projectionLoc = glGetUniformLocation(shaderP, "projection");
 
         glUseProgram(shaderP);
-
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
         glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, &projection[0][0]);
         for (int i = 0; i < 3; i++)
@@ -392,7 +394,7 @@ struct Cube
                 currCubitoModel = glm::translate(currCubitoModel, camadasCube[i].arr[e].getPosition());
 
                 unsigned int currCubitoModelLoc = glGetUniformLocation(shaderP, "model");
-                unsigned int colLoc = glGetUniformLocation(shaderP, "ourColor");
+                unsigned int colLoc = glGetUniformLocation(shaderP, "texture1");
 
                 bool animationRunning = camadasCube[i].arr[e].isAnimationRunning();
 
@@ -410,9 +412,10 @@ struct Cube
                 for (int k = 0; k <= 30; k += 6)
                 {
                     int t = k / 6;
-                    glm::vec3 CurrColor = camadasCube[i].arr[e].colors[t];
+                    unsigned int CurrTexture = camadasCube[i].arr[e].textures[t];
                     glActiveTexture(GL_TEXTURE0);
-                    glBindTexture(GL_TEXTURE_2D, texturesCube[i][e][a%7]);
+                    //glBindTexture(GL_TEXTURE_2D, texturesCube[i][e][a%7]);
+                    glBindTexture(GL_TEXTURE_2D, CurrTexture);
                     glUseProgram(shaderP);
                     glBindVertexArray(camadasCube[i].arr[e].VAO);
                     glDrawArrays(GL_TRIANGLES, k, 6);
@@ -422,7 +425,7 @@ struct Cube
         }
     }
 };
-// DÍA DEL EXAMEN FINAL
+// Dï¿½A DEL EXAMEN FINAL
 // RETOS:
 // 1. RESPIRAR
 // 2. QUE SE ARME SOLO
@@ -430,9 +433,9 @@ struct Cube
 
 // PARA EL JUEVES AVANCE
 
-// PARA EL EXÁMEN:
+// PARA EL EXï¿½MEN:
 // PRIMITIVAS DE TEXTURA
-// 
+//
 
 double angle = 0;
 double angleLimit = 89.0f;
@@ -456,6 +459,7 @@ struct CubeController {
     {
         camadasCube = &_cube.camadasCube;
         cube = &_cube;
+
         for (auto& face : faces)
             face.buildFace(*camadasCube);
         //printFaces();
@@ -466,9 +470,12 @@ struct CubeController {
 
     void faceRotation(double angle, int faceId)
     {
+
         v3 origin = faces[faceId].cubies[4]->position;
+
         vector<cubito*>* currCubies = &faces[faceId].cubies;
         auto sum = allAngleSums[faceId];
+
         /*for (int i = 0; i < 9; i++)
         {
             cout << sum[i] << '\n';
@@ -478,13 +485,12 @@ struct CubeController {
         faces[faceId].cubies[2]->setRotation(computeCircumPoints(radiusCorner, angle + sum[2], origin, faceId), angle);
         faces[faceId].cubies[6]->setRotation(computeCircumPoints(radiusCorner, angle + sum[6], origin, faceId), angle);
         faces[faceId].cubies[8]->setRotation(computeCircumPoints(radiusCorner, angle + sum[8], origin, faceId), angle);
-
         faces[faceId].cubies[4]->setRotation(computeCircumPoints(radiusCenter, angle + sum[4], origin, faceId), angle);
-
         faces[faceId].cubies[1]->setRotation(computeCircumPoints(radiusEdge, angle + sum[1], origin, faceId), angle);
         faces[faceId].cubies[3]->setRotation(computeCircumPoints(radiusEdge, angle + sum[3], origin, faceId), angle);
         faces[faceId].cubies[5]->setRotation(computeCircumPoints(radiusEdge, angle + sum[5], origin, faceId), angle);
         faces[faceId].cubies[7]->setRotation(computeCircumPoints(radiusEdge, angle + sum[7], origin, faceId), angle);
+
     }
 
     void printFaces() {
@@ -538,7 +544,7 @@ struct CubeController {
     {
         // frontFace 0, backFace 1, leftFace 2 , rightFace 3, upFace 4, downFace 5
         //En U -> 6 7 8 15 16 17 24 25 26
-        //Indices:  1   3     5     7 
+        //Indices:  1   3     5     7
         //Orden: 1 - 5 - 7 - 3
         //En D -> 1 - 5 - 7 - 3
         //Middle -> F(5) - F(3) - B(5) - B(3)
@@ -603,11 +609,11 @@ struct CubeController {
             {4, 0, 3}
         };
 
-
         for (int i = 0; i < 20; i++) {
             input[i + 1] = "";
             for (auto& j : colorIndexes[i]) {
                 input[i + 1].append(state[i]->getColors(j));
+                cout << j << endl;
             }
         }
     }
@@ -622,12 +628,13 @@ struct CubeController {
             if (angle <= angleLimit) {
                 angle += increment;
             }
-            else {
+            else{
                 angle = 0;
                 swapFaceColors(faces[rotationsQueue.front()], rotationsQueue.front());
                 rotationsQueue.pop();
             }
         }
+        printInput();
     }
     vector<glm::vec3> animationVectors = {
     glm::vec3(0,0.4,0)
@@ -647,7 +654,6 @@ struct CubeController {
             int indexCamada = animationDirectives[i][0];
             int indexCubito = animationDirectives[i][1];
             int indexVector = animationDirectives[i][2];
-
             cube->camadasCube[indexCamada].arr[indexCubito].setAnimationVector(animationVectors[indexVector]);
         }
     }
@@ -787,7 +793,7 @@ int main() {
 
     glEnable(GL_DEPTH_TEST);
     glGenTextures(55, &textures2[0]);
-    for (int i = 0; i < 55; i++) {
+    for (int i = 0; i < 54; i++) {
         glBindTexture(GL_TEXTURE_2D, textures2[i]);
         // set the texture wrapping parameters
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -799,7 +805,7 @@ int main() {
         int width, height, nrChannels;
         //string tmp = "./image" + to_string(i + 1) + ".jpg";
         string tmp = "./img" + to_string(i + 1) + ".jpg";
-        cout << "File: " << tmp << "    "<< textures[i] << endl;
+        //cout << "File: " << tmp << "    "<< textures2[i] << endl;
         stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
         unsigned char *data = stbi_load(tmp.c_str(), &width, &height, &nrChannels, 0);
         if (data) {
@@ -945,4 +951,3 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     if (fov > 45.0f)
         fov = 45.0f;
 }
-

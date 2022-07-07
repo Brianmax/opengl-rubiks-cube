@@ -106,6 +106,8 @@ void solver(vector<string>input, vector<string>& output)
 {
 
     // Recibe
+    for(auto x: input)
+        cout << "Lo que recibe: " << x << endl;
     //--- Define the goal.
     phase = 0;
     string goal[] = { "UF", "UR", "UB", "UL", "DF", "DR", "DB", "DL", "FR", "FL", "BR", "BL",
@@ -146,7 +148,7 @@ void solver(vector<string>input, vector<string>& output)
         map<cubestate, int> direction, lastMove;
         direction[currentId] = 1;
         direction[goalId] = 2;
-
+        cout << "We are here" << endl;
         //--- Dance the funky bidirectional BFS...
         while (1)
         {

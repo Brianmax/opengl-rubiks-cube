@@ -2,17 +2,24 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
-
-#define red glm::vec3(1.0,0.0,0.0)
-#define green glm::vec3(0.0,1.0,0.0)
-#define blue glm::vec3(0.0,0.0,1.0)
-#define white glm::vec3(1.0,1.0,1.0)
-#define orange glm::vec3(1.0,0.5,0.0)
-#define yellow glm::vec3(1.0,1.0,0.0)
-#define black glm::vec3(0.0,0.0,0.0)
+using namespace std;
+//#define red glm::vec3(1.0,0.0,0.0)
+//#define green glm::vec3(0.0,1.0,0.0)
+//#define blue glm::vec3(0.0,0.0,1.0)
+//#define white glm::vec3(1.0,1.0,1.0)
+//#define orange glm::vec3(1.0,0.5,0.0)
+//#define yellow glm::vec3(1.0,1.0,0.0)
+//#define black glm::vec3(0.0,0.0,0.0)
 
 unsigned int textures2[54] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54};
 //c
+vector<unsigned int> orangeT={textures2[6],textures2[7],textures2[8],textures2[3],textures2[4],textures2[5],textures2[0],textures2[1],textures2[2]};
+vector<unsigned int> yellowT={textures2[15],textures2[16],textures2[17],textures2[12],textures2[13],textures2[14],textures2[9],textures2[10],textures2[11]};
+vector<unsigned int> blueT={textures2[33],textures2[34],textures2[35],textures2[30],textures2[31],textures2[32],textures2[27],textures2[28],textures2[29]};
+vector<unsigned int> redT={textures2[24],textures2[25],textures2[26],textures2[21],textures2[22],textures2[23],textures2[18],textures2[19],textures2[20]};
+vector<unsigned int> greenT={textures2[24],textures2[25],textures2[26],textures2[21],textures2[22],textures2[23],textures2[18],textures2[19],textures2[20]};
+vector<unsigned int> whiteT={textures2[51], textures2[52], textures2[53], textures2[48], textures2[49] , textures2[50] , textures2[45] , textures2[46] , textures2[47]};
+
 #define	M1 textures2[6]
 #define M2 textures2[7]
 #define M3 textures2[8]
@@ -76,7 +83,7 @@ unsigned int textures2[54] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
 
 
 
-vector<vector<unsigned int> > texturesFront {
+vector< vector <unsigned int> > texturesFront {
         //  B      F     L     R      D     U
         {blackT,  M7,  u1,  blackT,   g1, blackT},
         {blackT,  M8, blackT, blackT, g2, blackT},
@@ -91,6 +98,7 @@ vector<vector<unsigned int> > texturesFront {
         {blackT, M9, blackT, P7, blackT, s3}
 };
 
+typedef vector<vector<unsigned int >> vv;
 std::vector<std::vector<unsigned int > > texturesMiddle {
         //  B       F       L      R     D     U
         {blackT, blackT,    u2,  blackT, g4, blackT},
@@ -106,7 +114,7 @@ std::vector<std::vector<unsigned int > > texturesMiddle {
         {blackT, blackT, blackT, P8, blackT, s6}
 };
 
-std::vector<std::vector<unsigned int > > texturesBack {
+std::vector<std::vector<unsigned int >> texturesBack {
         //  B       F       L       R      D      U
         {C7,      blackT,  u3,    blackT, g7,   blackT},
         {C8,      blackT, blackT, blackT, g8,   blackT},
@@ -120,50 +128,50 @@ std::vector<std::vector<unsigned int > > texturesBack {
         {C2,      blackT, blackT, blackT, blackT, s8},
         {C3,      blackT, blackT, P9, blackT, s9}
 };
-
+vector<vector<vector<unsigned int>>> texturesCube = {texturesFront, texturesMiddle, texturesBack};
 float cube_vertices[] = {
         // back
-        -0.2f, -0.2f, -0.2f,
-        0.2f, -0.2f, -0.2f,
-        0.2f,  0.2f, -0.2f,
-        0.2f,  0.2f, -0.2f,
-        -0.2f,  0.2f, -0.2f,
-        -0.2f, -0.2f, -0.2f,
+        -0.2f, -0.2f, -0.2f, 0.0f, 0.0f,
+        0.2f, -0.2f, -0.2f, 1.0f, 0.0f,
+        0.2f,  0.2f, -0.2f, 1.0f, 1.0f,
+        0.2f,  0.2f, -0.2f, 1.0f, 1.0f,
+        -0.2f,  0.2f, -0.2f, 0.0f, 1.0f,
+        -0.2f, -0.2f, -0.2f, 0.0f, 0.0f,
         //front
-        -0.2f, -0.2f,  0.2f,
-        0.2f, -0.2f,  0.2f,
-        0.2f,  0.2f,  0.2f,
-        0.2f,  0.2f,  0.2f,
-        -0.2f,  0.2f,  0.2f,
-        -0.2f, -0.2f,  0.2f,
+        -0.2f, -0.2f,  0.2f, 0.0f, 0.0f,
+        0.2f, -0.2f,  0.2f, 1.0f, 0.0f,
+        0.2f,  0.2f,  0.2f, 1.0f, 1.0f,
+        0.2f,  0.2f,  0.2f, 1.0f, 1.0f,
+        -0.2f,  0.2f,  0.2f, 0.0f, 1.0f,
+        -0.2f, -0.2f,  0.2f, 0.0f, 0.0f,
         //left
-        -0.2f,  0.2f,  0.2f,
-        -0.2f,  0.2f, -0.2f,
-        -0.2f, -0.2f, -0.2f,
-        -0.2f, -0.2f, -0.2f,
-        -0.2f, -0.2f,  0.2f,
-        -0.2f,  0.2f,  0.2f,
+        -0.2f,  0.2f,  0.2f, 0.0f, 0.0f,
+        -0.2f,  0.2f, -0.2f, 1.0f, 0.0f,
+        -0.2f, -0.2f, -0.2f, 1.0f, 1.0f,
+        -0.2f, -0.2f, -0.2f, 1.0f, 1.0f,
+        -0.2f, -0.2f,  0.2f, 0.0f, 1.0f,
+        -0.2f,  0.2f,  0.2f, 0.0f, 0.0f,
         //right
-        0.2f,  0.2f,  0.2f,
-        0.2f,  0.2f, -0.2f,
-        0.2f, -0.2f, -0.2f,
-        0.2f, -0.2f, -0.2f,
-        0.2f, -0.2f,  0.2f,
-        0.2f,  0.2f,  0.2f,
+        0.2f,  0.2f,  0.2f, 0.0f, 0.0f,
+        0.2f,  0.2f, -0.2f, 1.0f, 0.0f,
+        0.2f, -0.2f, -0.2f, 1.0f, 1.0f,
+        0.2f, -0.2f, -0.2f, 1.0f, 1.0f,
+        0.2f, -0.2f,  0.2f, 0.0f, 1.0f,
+        0.2f,  0.2f,  0.2f, 0.0f, 0.0f,
         //down
-        -0.2f, -0.2f, -0.2f,
-        0.2f, -0.2f, -0.2f,
-        0.2f, -0.2f,  0.2f,
-        0.2f, -0.2f,  0.2f,
-        -0.2f, -0.2f,  0.2f,
-        -0.2f, -0.2f, -0.2f,
+        -0.2f, -0.2f, -0.2f, 0.0f, 0.0f,
+        0.2f, -0.2f, -0.2f, 1.0f, 0.0f,
+        0.2f, -0.2f,  0.2f, 1.0f, 1.0f,
+        0.2f, -0.2f,  0.2f, 1.0f, 1.0f,
+        -0.2f, -0.2f,  0.2f, 0.0f, 1.0f,
+        -0.2f, -0.2f, -0.2f, 0.0f, 0.0f,
         //up
-        -0.2f,  0.2f, -0.2f,
-        0.2f,  0.2f, -0.2f,
-        0.2f,  0.2f,  0.2f,
-        0.2f,  0.2f,  0.2f,
-        -0.2f,  0.2f,  0.2f,
-        -0.2f,  0.2f, -0.2f
+        -0.2f,  0.2f, -0.2f, 0.0f, 0.0f,
+        0.2f,  0.2f, -0.2f, 1.0f, 0.0f,
+        0.2f,  0.2f,  0.2f, 1.0f, 1.0f,
+        0.2f,  0.2f,  0.2f, 1.0f, 1.0f,
+        -0.2f,  0.2f,  0.2f, 0.0f, 1.0f,
+        -0.2f,  0.2f, -0.2f, 0.0f, 0.0f
 };
 
 typedef glm::vec3 v3;
@@ -172,7 +180,7 @@ typedef std::vector<vv3> vvv3;
 
 //vector<glm::vec3> colors = { red, green, blue, white, orange, yellow, black };
 // red(0), green(1), blue, white, orange, yellow, black
-std::vector<std::vector<glm::vec3 > > coloresFront {
+/*std::vector<std::vector<glm::vec3 > > coloresFront {
         //  B(0)    F(1)   L(2)   R(3)  D(4)  U(5)
         vv3{black, white, green, black, red, black}, //0
         vv3{black, white, black, black, red, black}, //1
@@ -185,9 +193,9 @@ std::vector<std::vector<glm::vec3 > > coloresFront {
         vv3{black, white, green, black, black, orange}, //6
         vv3{black, white, black, black, black, orange}, //7
         vv3{black, white, black, blue, black, orange}, //8
-};
+};*/
 
-std::vector<std::vector<glm::vec3 > > coloresMiddle {
+/*std::vector<std::vector<glm::vec3 > > coloresMiddle {
         //  B       F       L      R     D     U
         vv3{black, black, green, black, red, black},
         vv3{black, black, black, black, red, black},
@@ -200,8 +208,8 @@ std::vector<std::vector<glm::vec3 > > coloresMiddle {
         vv3{black, black, green, black, black, orange},
         vv3{black, black, black, black, black, orange},
         vv3{black, black, black, blue, black, orange}
-};
-std::vector<std::vector<glm::vec3 > > coloresBack {
+};*/
+/*std::vector<std::vector<glm::vec3 > > coloresBack {
         //  B       F       L      R      D      U
         vv3{yellow, black, green, black, red, black},
         vv3{yellow, black, black, black, red, black},
@@ -214,7 +222,7 @@ std::vector<std::vector<glm::vec3 > > coloresBack {
         vv3{yellow, black, green, black, black, orange},
         vv3{yellow, black, black, black, black, orange},
         vv3{yellow, black, black, blue, black, orange}
-};
+};*/
 
 
 //CUBOS SEPARADOS
@@ -263,7 +271,6 @@ std::vector<std::vector<glm::vec3>> positions = {cubePositionsFront, cubePositio
 #include<utility>
 
 typedef std::vector<std::pair<int, int>> vp;
-
 vp FswapDirectives = {
         std::make_pair(5, 1),
         std::make_pair(7, 5),
@@ -274,7 +281,6 @@ vp FswapDirectives = {
         std::make_pair(6, 8),
         std::make_pair(0, 6)
 };
-
 vp BswapDirectives = {
         std::make_pair(5, 1),
         std::make_pair(7, 5),
@@ -327,6 +333,7 @@ vp DswapDirectives = {
 };
 
 std::vector<vp> allDirectives = { FswapDirectives, BswapDirectives,LswapDirectives,RswapDirectives,UswapDirectives,DswapDirectives };
+
 
 vp FColorRotation = {
         std::make_pair(5, 2),

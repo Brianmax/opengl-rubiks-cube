@@ -196,6 +196,68 @@ glm::vec3 axisRotationHandler()
 int cubitoId = 0;
 int camadaId = 0;
 
+struct AssembleAnimation {
+    bool paused;
+    bool running;
+    glm::vec3 initPos;
+    glm::vec3 finalPos;
+    glm::vec3 currPos;
+    glm::vec3 translationVector;
+    glm::vec3 increments;
+    int limit;
+    int counter;
+    int factor;
+
+    AssembleAnimation(){
+        running = false;
+        initPos = glm::vec3(0, 0, 0);
+        finalPos = glm::vec3(0, 0, 0);
+        currPos = glm::vec3(0, 0, 0);
+        limit = 10;
+        counter = 0;
+    }
+    void computeIncrements() {
+        increments = finalPos;
+        increments = glm::vec3(0.1, 0.1, 0.1);
+    }
+    void setPositions(glm::vec3 _initPos, glm::vec3 _finalPos) {
+        initPos = _initPos;
+        currPos = initPos;
+        finalPos = _finalPos;
+        computeIncrements();
+        running = true;
+        paused = true;
+    }
+    void reset()
+    {
+        currPos = glm::vec3(0, 0, 0);
+        initPos = glm::vec3(0, 0, 0);
+        finalPos = glm::vec3(0, 0, 0);
+        increments = glm::vec3(0, 0, 0);
+        limit = 10;
+        counter = 0;
+        running = false;
+    }
+    
+    glm::vec3 execute() {
+        if (counter > limit)
+        {
+            reset();
+        }
+        if (!paused) {
+            if (running) {
+                //cout << currState.x << " " << currState.y << " " << currState.z << '\n';
+                currPos -= increments;
+                counter++;
+            }
+        }
+        return currPos;
+    }
+    void play() {
+        paused = false;
+    }
+};
+
 
 struct AnimationHandler {
     bool running;
@@ -278,7 +340,11 @@ struct cubito {
     glm::vec3 position;
     glm::vec3 translation;
     glm::vec3 animation;
+
     AnimationHandler ah;
+    
+    AssembleAnimation assembleAnimation;
+
     float angle;
     int id;
     int c_id;
@@ -292,6 +358,7 @@ struct cubito {
         angle = 0;
         translation = glm::vec3(0.0f, 0.0f, 0.0f);
         animation = glm::vec3(0.0f, 0.0f, 0.0f);
+
         glGenBuffers(1, &VBO);
         glGenVertexArrays(1, &VAO);
         glBindVertexArray(VAO);
@@ -324,13 +391,24 @@ struct cubito {
     {
         ah.setAnimation(position, animationVector, limit, reverse);
     }
+    void setAssemble(glm::vec3 translationVector)
+    {
+        assembleAnimation.setPositions(translationVector, position);
+    }
     bool isAnimationRunning() {
         return ah.running;
+    }
+    bool isAssembleRunning()
+    {
+        return assembleAnimation.running;
     }
     glm::vec3 getAnimationVector()
     {
         ah.execute();
         return ah.currState;
+    }
+    glm::vec3 getTransitionVector() {
+        return assembleAnimation.execute();
     }
 
     string getColors(int colorIdx) 
@@ -505,7 +583,6 @@ struct Cube
 
                 unsigned int currCubitoModelLoc = glGetUniformLocation(shaderP, "model");
                 unsigned int colLoc = glGetUniformLocation(shaderP, "texture1");
-
                 bool animationRunning = camadasCube[i].arr[e].isAnimationRunning();
                 if (!animationRunning) {
                     currCubitoModel = glm::rotate(currCubitoModel, glm::radians(camadasCube[i].arr[e].angle), axisRotationHandler());
@@ -516,7 +593,14 @@ struct Cube
                     currCubitoModel = glm::scale(currCubitoModel, glm::vec3(scaleX, scaleY, scaleZ));
                     glm::vec3 currentVector = breateAnimationVectors2[e];
                     currCubitoModel = glm::translate(currCubitoModel, breateAnimationVectors2[e]);
+                }
+                bool assembleRunning = camadasCube[i].arr[e].isAssembleRunning();
 
+                if (assembleRunning) {
+                    currCubitoModel = glm::translate(currCubitoModel, camadasCube[i].arr[e].getTransitionVector());
+                }
+                else {
+                    currCubitoModel = glm::rotate(currCubitoModel, glm::radians(camadasCube[i].arr[e].angle), axisRotationHandler());
                 }
                 glUniformMatrix4fv(currCubitoModelLoc, 1, GL_FALSE, &currCubitoModel[0][0]);
                 glBindVertexArray(camadasCube[i].arr[e].VAO);
@@ -537,17 +621,7 @@ struct Cube
         }
     }
 };
-// D�A DEL EXAMEN FINAL
-// RETOS:
-// 1. RESPIRAR
-// 2. QUE SE ARME SOLO
-// 3. CUBO DE CUBOS
 
-// PARA EL JUEVES AVANCE
-
-// PARA EL EX�MEN:
-// PRIMITIVAS DE TEXTURA
-//
 
 double angle = 0;
 double angleLimit = 89.0f;
@@ -740,7 +814,7 @@ struct CubeController {
             if (angle <= angleLimit) {
                 angle += increment;
             }
-            else{
+            else {
                 angle = 0;
                 swapFaceColors(faces[rotationsQueue.front()], rotationsQueue.front());
                 rotationsQueue.pop();
@@ -762,18 +836,18 @@ struct CubeController {
             glm::vec3(-0.1,0.1,-0.1), glm::vec3(0,0.1,-0.1), glm::vec3(0.1,0.1,-0.1)
     };
 
-    vector<glm::vec3> fallAnimationVectors = {
-        glm::vec3(0,-0.2,0.3), glm::vec3(0,-0.2,0.2), glm::vec3(0,-0.2,0.4),
-        glm::vec3(0,-0.4,0.1), glm::vec3(0,-0.4,0.6), glm::vec3(0,-0.4,0.5),
-        glm::vec3(0,-0.6,0.5), glm::vec3(0,-0.6,0.1), glm::vec3(0,-0.6,0.8),
+    vector<glm::vec3> assembleTranslationVectors = {
+        glm::vec3(2,-0.5,1), glm::vec3(1,-0.5,0.4), glm::vec3(2,-0.5,1),
+        glm::vec3(1.6,-1,-0.9), glm::vec3(2,-1,-0.4), glm::vec3(3,-1,0),
+        glm::vec3(3,-1.5,0.4), glm::vec3(0.3,-1.5,2), glm::vec3(1,-1.5,2),
 
-        glm::vec3(0,0,0), glm::vec3(0,0,0), glm::vec3(0,0,0),
-        glm::vec3(0,0,0), glm::vec3(0,0,0), glm::vec3(0,0,0),
-        glm::vec3(0,0,0), glm::vec3(0,0,0), glm::vec3(0,0,0),
+        glm::vec3(2,-0.5,-1), glm::vec3(1,-0.5,-0.4), glm::vec3(2,-0.5,-1),
+        glm::vec3(1.6,-1,0.9), glm::vec3(2,-1,0.4), glm::vec3(3,-1,0),
+        glm::vec3(3,-1.5,-0.4), glm::vec3(0.3,-1.5,-2), glm::vec3(1,-1.5,-2),
 
-        glm::vec3(0,0,0), glm::vec3(0,0,0), glm::vec3(0,0,0),
-        glm::vec3(0,0,0), glm::vec3(0,0,0), glm::vec3(0,0,0),
-        glm::vec3(0,0,0), glm::vec3(0,0,0), glm::vec3(0,0,0)
+        glm::vec3(-2,-0.5,1), glm::vec3(-1,-0.5,0.4), glm::vec3(-2,-0.5,1),
+        glm::vec3(-1.6,-1,-0.9), glm::vec3(-2,-1,-0.4), glm::vec3(-3,-1,0),
+        glm::vec3(-3,-1.5,0.4), glm::vec3(-0.3,-1.5,2), glm::vec3(-1,-1.5,2),
 
     };
 
@@ -792,9 +866,8 @@ struct CubeController {
     //    {0, 10, 2},
     //};
 
-   void breath()
+    void breath()
     {
-        //cout << "Animate" << '\n';
         int k = 0;
         for (int i = 0; i < 3; i++)
         {
@@ -812,9 +885,31 @@ struct CubeController {
         {
             for (int j = 0; j < 9; j++)
             {
-                cube->camadasCube[i].arr[j].setAnimationVector(fallAnimationVectors[k], 40,true);
+                cube->camadasCube[i].arr[j].setAnimationVector(assembleTranslationVectors[k], 40, true);
                 k++;
             }
+        }
+    }
+
+    void assemble()
+    {
+        cout << "Efecto" << '\n';
+        int k = 0;
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 9; j++)
+            {
+                cube->camadasCube[i].arr[j].setAssemble(assembleTranslationVectors[k]);
+                k++;
+            }
+        }
+    }
+
+    void assemblePlay() {
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 9; j++)
+                cube->camadasCube[i].arr[j].assembleAnimation.play();
         }
     }
     void solve()
@@ -984,6 +1079,8 @@ int main() {
     glLineWidth(5);
     Cube cube = Cube(shaderProgram);
     cubeController.setCubo(cube);
+    cubeController.assemble();
+
 
     while (!glfwWindowShouldClose(window)) {
         processInput(window);
@@ -1059,7 +1156,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     }
     if (key == 50 && action == GLFW_PRESS)
     {
-        cubeController.fall();
+        cubeController.assemblePlay();
     }
     if (key == 93 && action == GLFW_PRESS)
     {

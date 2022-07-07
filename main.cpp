@@ -218,11 +218,9 @@ struct AnimationHandler {
 };
 bool checkIndex(vector<unsigned int> p, unsigned int index)
 {
-    for(int i=0; i < p.size(); i++)
-    {
-        if (p[i] == index)
-            return true;
-    }
+    for (auto i : p) 
+        if (i == index) return true;
+  
     return false;
 }
 struct cubito {
@@ -287,25 +285,19 @@ struct cubito {
         return ah.currState;
     }
 
-    string getColors(int colorIdx)
+    string getColors(int colorIdx) 
     {
         if (checkIndex(orangeT, textures[colorIdx])){
-            cout << "Estamos en la U" << endl;
             return "U";}
-        if (checkIndex(blueT, textures[colorIdx])){
-            cout << "Estamos en la R" << endl;
+        else if (checkIndex(blueT, textures[colorIdx])){
             return "R";}
-        if (checkIndex(whiteT, textures[colorIdx])){
-            cout << "Estamos en la F" << endl;
+        else if (checkIndex(whiteT, textures[colorIdx])){
             return "F";}
-        if (checkIndex(greenT, textures[colorIdx])){
-            cout << "Estamos en la L" << endl;
+        else if (checkIndex(greenT, textures[colorIdx])){
             return "L";}
-        if (checkIndex(redT, textures[colorIdx])){
-            cout << "Estamos en la D" << endl;
+        else if (checkIndex(redT, textures[colorIdx])){
             return "D";}
-        if (checkIndex(yellowT, textures[colorIdx])){
-            cout << "Estamos en la B" << endl;
+        else if (checkIndex(yellowT, textures[colorIdx])){
             return "B";}
         else {
             return "-";
@@ -414,7 +406,7 @@ struct Cube
         float camX = sin(glfwGetTime()) * radius;
         float camZ = cos(glfwGetTime()) * radius;
         float camYY = sin(glfwGetTime()) * radius;
-        glm::mat4 view = glm::lookAt(glm::vec3(camX, camY, camZ),glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+        glm::mat4 view = glm::lookAt(glm::vec3(camX, camYY, camZ),glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
         //glm::mat4 view = glm::lookAt(glm::vec3(camX, 0.0, camZ),glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
         //glm::mat4 view = glm::lookAt(glm::vec3(0.0, camYY, camZ),glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
         //glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
@@ -652,7 +644,7 @@ struct CubeController {
             input[i + 1] = "";
             for (auto& j : colorIndexes[i]) {
                 input[i + 1].append(state[i]->getColors(j));
-                cout << j << endl;
+                //cout << j << endl;
             }
         }
     }
@@ -673,7 +665,7 @@ struct CubeController {
                 rotationsQueue.pop();
             }
         }
-        printInput();
+        //printInput();
     }
     vector<glm::vec3> breateAnimationVectors = {
         glm::vec3(-0.1,-0.1,0.1), glm::vec3(0,-0.1,0.1), glm::vec3(0.1,-0.1,0.1),
@@ -891,7 +883,7 @@ int main() {
         // load image, create texture and generate mipmaps
         int width, height, nrChannels;
         //string tmp = "./image" + to_string(i + 1) + ".jpg";
-        string tmp = "./img" + to_string(i + 1) + ".jpg";
+        string tmp = "./img/img" + to_string(i + 1) + ".jpg";
         //cout << "File: " << tmp << "    "<< textures2[i] << endl;
         stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
         unsigned char *data = stbi_load(tmp.c_str(), &width, &height, &nrChannels, 0);

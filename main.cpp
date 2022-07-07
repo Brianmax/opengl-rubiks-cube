@@ -511,16 +511,10 @@ struct Cube
                     currCubitoModel = glm::rotate(currCubitoModel, glm::radians(camadasCube[i].arr[e].angle), axisRotationHandler());
                 }
                 else {
-                    //cout << "Running" << '\n';
-                    //currCubitoModel = glm::mat4(1.0f);
                     scaleVar();
                     Increment();
-                    //cout << scaleX << "   " << scaleY << "   "<< scaleZ << endl;
                     currCubitoModel = glm::scale(currCubitoModel, glm::vec3(scaleX, scaleY, scaleZ));
-                    //currCubitoModel = glm::translate(currCubitoModel, camadasCube[i].arr[e].getAnimationVector());
-                    cout << " Este es v " << v << endl;
                     glm::vec3 currentVector = breateAnimationVectors2[e];
-                    cout << currentVector.x<< "  " << currentVector.y << "  " << currentVector.z << endl;
                     currCubitoModel = glm::translate(currCubitoModel, breateAnimationVectors2[e]);
 
                 }

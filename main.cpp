@@ -517,7 +517,7 @@ void scaleVar()
         scaleX = var;
         scaleY = var;
         scaleZ= var;
-        if(var > 0.9) {
+        if(var > 1.0) {
             upperLimit = false;
             lowerLimit = true;
         }
@@ -528,13 +528,16 @@ void scaleVar()
         scaleX = var;
         scaleY = var;
         scaleZ = var;
-        if (var < 0.5)
+        if (var < 0.7)
         {
             lowerLimit = false;
             upperLimit = true;
         }
     }
 }
+bool espiral = false;
+bool ejex = false;
+bool ejey = false;
 struct Cube
 {
     unsigned int shaderP;
@@ -564,10 +567,22 @@ struct Cube
         float camX = sin(glfwGetTime()) * radius;
         float camZ = cos(glfwGetTime()) * radius;
         float camYY = sin(glfwGetTime()) * radius;
-        glm::mat4 view = glm::lookAt(glm::vec3(camX, camYY, camZ),glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+
+        //glm::mat4 view = glm::lookAt(glm::vec3(camX, camYY, camZ),glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
         //glm::mat4 view = glm::lookAt(glm::vec3(camX, 0.0, camZ),glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
         //glm::mat4 view = glm::lookAt(glm::vec3(0.0, camYY, camZ),glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
-        //glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        if (espiral)
+        {
+            view = glm::lookAt(glm::vec3(camX, camYY, camZ),glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+        }
+        else if(ejex)
+        {
+            view = glm::lookAt(glm::vec3(camX, 0.0, camZ),glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+        }
+        else if(ejey) {
+            view = glm::lookAt(glm::vec3(0.0, camYY, camZ), glm::vec3(0.0, 0.0, 0.0),glm::vec3(0.0, 1.0, 0.0));
+        }
         unsigned int viewLoc = glGetUniformLocation(shaderP, "view");
         unsigned int projectionLoc = glGetUniformLocation(shaderP, "projection");
 
@@ -850,22 +865,6 @@ struct CubeController {
         glm::vec3(-3,-1.5,0.4), glm::vec3(-0.3,-1.5,2), glm::vec3(-1,-1.5,2),
 
     };
-
-    //vector<vector<int>> animationDirectives = {
-    //    //camada, indexCubo, vector
-    //    {0, 0, 0},
-    //    {0, 1, 1},
-    //    {0, 2, 2},
-    //    {0, 3, 2},
-    //    {0, 4, 2},
-    //    {0, 5, 2},
-    //    {0, 6, 2},
-    //    {0, 7, 2},
-    //    {0, 8, 2},
-    //    {0, 9, 2},
-    //    {0, 10, 2},
-    //};
-
     void breath()
     {
         int k = 0;
@@ -978,7 +977,9 @@ int main() {
     }
     glViewport(0, 0, 800, 600);
 
-
+    cout << "------------------Simulacion cubo de rubik-----------------------"<<endl;
+    cout << "Presione 2 para ensamblar el cubo" << endl;
+    cout << "Presione 1 para para la animacion de respiro" <<  endl;
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     //glfwSetCursorPosCallback(window, mouse_callback);
@@ -1165,6 +1166,29 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     if (key == 47 && action == GLFW_PRESS)
     {
         test -= 1;
+    }
+    if (key == GLFW_KEY_N && action == GLFW_PRESS)
+    {
+        if(espiral)
+        {
+            espiral = false;
+        }
+        else
+            espiral = true;
+    }
+    if(key == GLFW_KEY_X && action == GLFW_PRESS)
+    {
+        if(ejex)
+            ejex = false;
+        else
+            ejex = true;
+    }
+    if(key == GLFW_KEY_Y && action == GLFW_PRESS)
+    {
+        if(ejey)
+            ejey = false;
+        else
+            ejey = true;
     }
 }
 

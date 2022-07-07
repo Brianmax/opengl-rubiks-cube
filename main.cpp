@@ -3,20 +3,18 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <vector>
 #include <math.h>
-#include <array>
 #include "queue"
 #include "utility"
 #include "vertex.h"
 #include "string"
 #include "solver.h"
-
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+unsigned int shaderProgram;
 using namespace std;
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
@@ -28,21 +26,26 @@ char infoLog[512];
 const char* vertexShaderSource =
 "#version 330 core\n"
 "layout (location = 0) in vec3 aPos;\n"
+"layout (location = 1) in vec2 aCoord;\n"
+"out vec2 TexCoord;\n"
 "uniform mat4 model;\n"
 "uniform mat4 view;\n"
 "uniform mat4 projection;\n"
-"void main() {\n"
+"void main(){\n"
 "	gl_Position = projection * view * model * vec4(aPos, 1.0);\n"
-"}\0";
+"   TexCoord = vec2(aCoord.x, 1.0 - aCoord.y);\n"
+"}\n";
 
 // Basic fragment shader
 const char* fragmentShaderSource =
 "#version 330 core\n"
 "out vec4 FragColor;\n"
+"in vec2 TexCoord;\n"
+"uniform sampler2D texture1;\n"
 "uniform vec4 ourColor;\n"
 "void main() {\n"
-"	FragColor = ourColor;\n"
-"}\0";
+"	FragColor = texture(texture1, TexCoord);\n"
+"}\n";
 
 bool firstMouse = true;
 float yaw = -90.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
@@ -63,7 +66,7 @@ bool bussy = false;
 // 8 restantes - esquinas
 string initialCube[] = { "UF", "UR", "UB", "UL", "DF", "DR", "DB", "DL", "FR", "FL", "BR", "BL", "UFR", "URB", "UBL", "ULF", "DRF", "DFL", "DLB", "DBR" };
 
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 2.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 // timing  
@@ -104,9 +107,28 @@ float radiusCorner = 0.71;
 float radiusEdge = 0.5;
 float radiusCenter = 0.0f;
 int test = 55;
-
-
-
+float camY = 0.0;
+bool up = true;
+bool down = false;
+void incrementHandler()
+{
+    if(up)
+    {
+        camY = camY + 0.03;
+        if (camY > 7.0) {
+            up = false;
+            down = true;
+        }
+    }
+    else if(down)
+    {
+        camY = camY - 0.03;
+        if(camY < -7.0) {
+            down = false;
+            up = true;
+        }
+    }
+}
 glm::vec3 axisRotationHandler()
 {
     if (axisRotation <= 1)
@@ -194,10 +216,19 @@ struct AnimationHandler {
     }
     
 };
-
+bool checkIndex(vector<unsigned int> p, unsigned int index)
+{
+    for(int i=0; i < p.size(); i++)
+    {
+        if (p[i] == index)
+            return true;
+    }
+    return false;
+}
 struct cubito {
     unsigned int VBO, VAO;
     vector<glm::vec3 > colors;
+    vector<unsigned int> textures;
     glm::vec3 position;
     glm::vec3 translation;
     glm::vec3 animation;
@@ -205,26 +236,25 @@ struct cubito {
     float angle;
     int id;
     int c_id;
-    cubito(vector<glm::vec3> _colors, glm::vec3 _position)
+    cubito(vector<unsigned int> _textures, glm::vec3 _position)
     {
         c_id = camadaId;
         id = cubitoId;
         cubitoId++;
-        colors = _colors;
+        textures = _textures;
         position = _position;
         angle = 0;
         translation = glm::vec3(0.0f, 0.0f, 0.0f);
         animation = glm::vec3(0.0f, 0.0f, 0.0f);
-
         glGenBuffers(1, &VBO);
         glGenVertexArrays(1, &VAO);
         glBindVertexArray(VAO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), cube_vertices, GL_STATIC_DRAW);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
     }
     void setRotation(glm::vec<3, float> _translation, float _angle)
     {
@@ -259,33 +289,37 @@ struct cubito {
 
     string getColors(int colorIdx)
     {
-        if (colors[colorIdx] == orange)
-            return "U";
-        if (colors[colorIdx] == blue)
-            return "R";
-        if (colors[colorIdx] == white)
-            return "F";
-        if (colors[colorIdx] == green)
-            return "L";
-        if (colors[colorIdx] == red)
-            return "D";
-        if (colors[colorIdx] == yellow)
-            return "B";
+        if (checkIndex(orangeT, textures[colorIdx])){
+            cout << "Estamos en la U" << endl;
+            return "U";}
+        if (checkIndex(blueT, textures[colorIdx])){
+            cout << "Estamos en la R" << endl;
+            return "R";}
+        if (checkIndex(whiteT, textures[colorIdx])){
+            cout << "Estamos en la F" << endl;
+            return "F";}
+        if (checkIndex(greenT, textures[colorIdx])){
+            cout << "Estamos en la L" << endl;
+            return "L";}
+        if (checkIndex(redT, textures[colorIdx])){
+            cout << "Estamos en la D" << endl;
+            return "D";}
+        if (checkIndex(yellowT, textures[colorIdx])){
+            cout << "Estamos en la B" << endl;
+            return "B";}
         else {
             return "-";
         }
     }
 };
 
-
-
 struct camada {
     vector<cubito> arr;
-    camada(vvv3 camadaColors, vv3 positions)
+    camada(vv camadaTextures, vv3 positions)
     {
         for (int i = 0; i < 9; i++)
         {
-            arr.emplace_back(cubito(camadaColors[i], positions[i]));
+            arr.emplace_back(cubito(camadaTextures[i], positions[i]));
         }
     }
     void reset()
@@ -320,15 +354,13 @@ struct Face {
     }
 };
 
-
-
-void swapCubieColors(vv3& colors, int faceId)
+void swapCubieColors(vector<unsigned int>& textures, int faceId)
 {
-    vv3 tmp = colors;
+    vector<unsigned int> tmp = textures;
     for (int i = 0; i < 4; i++)
     {
         pair<int, int> indexes = colorRotations[faceId][i];
-        colors[indexes.second] = tmp[indexes.first];
+        textures[indexes.second] = tmp[indexes.first];
     }
 }
 
@@ -346,44 +378,50 @@ void swapFaceColors(Face& target, int faceId)
     for (int i = 0; i < 8; i++)
     {
         pair<int, int> indexes = allDirectives[faceId][i];
-        target.cubies[indexes.first]->colors = tmp[indexes.second].colors;
+        target.cubies[indexes.first]->textures = tmp[indexes.second].textures;
         target.cubies[indexes.first]->id = tmp[indexes.second].id;
-        swapCubieColors(target.cubies[indexes.first]->colors, faceId);
+        swapCubieColors(target.cubies[indexes.first]->textures, faceId);
         target.cubies[indexes.first]->reset();
     }
     target.cubies[4]->reset();
 }
-
-
 struct Cube
 {
     unsigned int shaderP;
     vector<camada> camadasCube;
     Cube(unsigned int shaderProgram) {
         shaderP = shaderProgram;
+        camada CamadaFront(texturesFront, cubePositionsFront);
 
-        camada CamadaFront(coloresFront, cubePositionsFront);
         //cubitoId = 0;
         camadaId++;
-        camada CamadaMiddle(coloresMiddle, cubePositionsMiddle);
+        camada CamadaMiddle(texturesMiddle, cubePositionsMiddle);
         //cubitoId = 0;
         camadaId++;
-        camada CamadaBack(coloresBack, cubePositionsBack);
+        camada CamadaBack(texturesBack, cubePositionsBack);
+
         camadasCube.push_back(CamadaFront);
         camadasCube.push_back(CamadaMiddle);
         camadasCube.push_back(CamadaBack);
+
     }
     void draw()
     {
+        incrementHandler();
         glm::mat4 projection = glm::mat4(1.0f);
         projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-
+        const float radius = 5.0f;
+        float camX = sin(glfwGetTime()) * radius;
+        float camZ = cos(glfwGetTime()) * radius;
+        float camYY = sin(glfwGetTime()) * radius;
+        glm::mat4 view = glm::lookAt(glm::vec3(camX, camY, camZ),glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+        //glm::mat4 view = glm::lookAt(glm::vec3(camX, 0.0, camZ),glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+        //glm::mat4 view = glm::lookAt(glm::vec3(0.0, camYY, camZ),glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+        //glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
         unsigned int viewLoc = glGetUniformLocation(shaderP, "view");
         unsigned int projectionLoc = glGetUniformLocation(shaderP, "projection");
 
         glUseProgram(shaderP);
-
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
         glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, &projection[0][0]);
         for (int i = 0; i < 3; i++)
@@ -394,7 +432,7 @@ struct Cube
                 currCubitoModel = glm::translate(currCubitoModel, camadasCube[i].arr[e].getPosition());
 
                 unsigned int currCubitoModelLoc = glGetUniformLocation(shaderP, "model");
-                unsigned int colLoc = glGetUniformLocation(shaderP, "ourColor");
+                unsigned int colLoc = glGetUniformLocation(shaderP, "texture1");
 
                 bool animationRunning = camadasCube[i].arr[e].isAnimationRunning();
 
@@ -409,21 +447,24 @@ struct Cube
 
                 glUniformMatrix4fv(currCubitoModelLoc, 1, GL_FALSE, &currCubitoModel[0][0]);
                 glBindVertexArray(camadasCube[i].arr[e].VAO);
-
+                int a = 0;
                 for (int k = 0; k <= 30; k += 6)
                 {
                     int t = k / 6;
-                    glm::vec3 CurrColor = camadasCube[i].arr[e].colors[t];
-                    glUniform4f(colLoc, CurrColor[0], CurrColor[1], CurrColor[2], 1.0);
+                    unsigned int CurrTexture = camadasCube[i].arr[e].textures[t];
+                    glActiveTexture(GL_TEXTURE0);
+                    //glBindTexture(GL_TEXTURE_2D, texturesCube[i][e][a%7]);
+                    glBindTexture(GL_TEXTURE_2D, CurrTexture);
+                    glUseProgram(shaderP);
+                    glBindVertexArray(camadasCube[i].arr[e].VAO);
                     glDrawArrays(GL_TRIANGLES, k, 6);
-                    glUniform4f(colLoc, 0, 0, 0, 1.0);
-                    glDrawArrays(GL_LINE_STRIP, k, 6);
+                    a++;
                 }
             }
         }
     }
 };
-// DÍA DEL EXAMEN FINAL
+// Dï¿½A DEL EXAMEN FINAL
 // RETOS:
 // 1. RESPIRAR
 // 2. QUE SE ARME SOLO
@@ -431,9 +472,9 @@ struct Cube
 
 // PARA EL JUEVES AVANCE
 
-// PARA EL EXÁMEN:
+// PARA EL EXï¿½MEN:
 // PRIMITIVAS DE TEXTURA
-// 
+//
 
 double angle = 0;
 double angleLimit = 89.0f;
@@ -457,6 +498,7 @@ struct CubeController {
     {
         camadasCube = &_cube.camadasCube;
         cube = &_cube;
+
         for (auto& face : faces)
             face.buildFace(*camadasCube);
         //printFaces();
@@ -467,9 +509,12 @@ struct CubeController {
 
     void faceRotation(double angle, int faceId)
     {
+
         v3 origin = faces[faceId].cubies[4]->position;
+
         vector<cubito*>* currCubies = &faces[faceId].cubies;
         auto sum = allAngleSums[faceId];
+
         /*for (int i = 0; i < 9; i++)
         {
             cout << sum[i] << '\n';
@@ -479,13 +524,12 @@ struct CubeController {
         faces[faceId].cubies[2]->setRotation(computeCircumPoints(radiusCorner, angle + sum[2], origin, faceId), angle);
         faces[faceId].cubies[6]->setRotation(computeCircumPoints(radiusCorner, angle + sum[6], origin, faceId), angle);
         faces[faceId].cubies[8]->setRotation(computeCircumPoints(radiusCorner, angle + sum[8], origin, faceId), angle);
-
         faces[faceId].cubies[4]->setRotation(computeCircumPoints(radiusCenter, angle + sum[4], origin, faceId), angle);
-
         faces[faceId].cubies[1]->setRotation(computeCircumPoints(radiusEdge, angle + sum[1], origin, faceId), angle);
         faces[faceId].cubies[3]->setRotation(computeCircumPoints(radiusEdge, angle + sum[3], origin, faceId), angle);
         faces[faceId].cubies[5]->setRotation(computeCircumPoints(radiusEdge, angle + sum[5], origin, faceId), angle);
         faces[faceId].cubies[7]->setRotation(computeCircumPoints(radiusEdge, angle + sum[7], origin, faceId), angle);
+
     }
 
     void printFaces() {
@@ -539,7 +583,7 @@ struct CubeController {
     {
         // frontFace 0, backFace 1, leftFace 2 , rightFace 3, upFace 4, downFace 5
         //En U -> 6 7 8 15 16 17 24 25 26
-        //Indices:  1   3     5     7 
+        //Indices:  1   3     5     7
         //Orden: 1 - 5 - 7 - 3
         //En D -> 1 - 5 - 7 - 3
         //Middle -> F(5) - F(3) - B(5) - B(3)
@@ -604,11 +648,11 @@ struct CubeController {
             {4, 0, 3}
         };
 
-
         for (int i = 0; i < 20; i++) {
             input[i + 1] = "";
             for (auto& j : colorIndexes[i]) {
                 input[i + 1].append(state[i]->getColors(j));
+                cout << j << endl;
             }
         }
     }
@@ -623,12 +667,13 @@ struct CubeController {
             if (angle <= angleLimit) {
                 angle += increment;
             }
-            else {
+            else{
                 angle = 0;
                 swapFaceColors(faces[rotationsQueue.front()], rotationsQueue.front());
                 rotationsQueue.pop();
             }
         }
+        printInput();
     }
     vector<glm::vec3> breateAnimationVectors = {
         glm::vec3(-0.1,-0.1,0.1), glm::vec3(0,-0.1,0.1), glm::vec3(0.1,-0.1,0.1),
@@ -674,7 +719,7 @@ struct CubeController {
     //    {0, 10, 2},
     //};
 
-    void breath()
+   void breath()
     {
         //cout << "Animate" << '\n';
         int k = 0;
@@ -747,20 +792,19 @@ CubeController cubeController;
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
-
 int main() {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
     if (window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return -1;
     }
     glfwMakeContextCurrent(window);
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
@@ -769,8 +813,8 @@ int main() {
 
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    glfwSetCursorPosCallback(window, mouse_callback);
-    glfwSetScrollCallback(window, scroll_callback);
+    //glfwSetCursorPosCallback(window, mouse_callback);
+    //glfwSetScrollCallback(window, scroll_callback);
     glfwSetKeyCallback(window, keyCallback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -813,7 +857,7 @@ int main() {
     // 2. Link shaders
 
     // Create a shader program
-    unsigned int shaderProgram;
+
     shaderProgram = glCreateProgram();
 
     // Attach the compiled shaders to the shader program
@@ -833,7 +877,36 @@ int main() {
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
+
     glEnable(GL_DEPTH_TEST);
+    glGenTextures(55, &textures2[0]);
+    for (int i = 0; i < 54; i++) {
+        glBindTexture(GL_TEXTURE_2D, textures2[i]);
+        // set the texture wrapping parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        // set texture filtering parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        // load image, create texture and generate mipmaps
+        int width, height, nrChannels;
+        //string tmp = "./image" + to_string(i + 1) + ".jpg";
+        string tmp = "./img" + to_string(i + 1) + ".jpg";
+        //cout << "File: " << tmp << "    "<< textures2[i] << endl;
+        stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
+        unsigned char *data = stbi_load(tmp.c_str(), &width, &height, &nrChannels, 0);
+        if (data) {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+            glGenerateMipmap(GL_TEXTURE_2D);
+        } else {
+            std::cout << "Failed to load texture" << std::endl;
+        }
+        stbi_image_free(data);
+        glUseProgram(shaderProgram);
+        //ourShader.setInt("texture1", 0);
+        int loc = glGetUniformLocation(shaderProgram, "texture1");
+        glUniform1i(loc, 0);
+    }
     glPointSize(8);
     glLineWidth(5);
     Cube cube = Cube(shaderProgram);
@@ -969,4 +1042,3 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     if (fov > 45.0f)
         fov = 45.0f;
 }
-

@@ -83,7 +83,7 @@ void Increment()
 {
     if(tmas)
     {
-        v = v + 0.05;
+        v = v + 0.09;
         for(int i = 0; i < breateAnimationVectors2.size(); i++)
         {
             breateAnimationVectors2[i].x = breateAnimationVectors2[i].x + 0.009;
@@ -98,7 +98,7 @@ void Increment()
     }
     else if(tmenos)
     {
-        v = v - 0.05;
+        v = v - 0.09;
         for(int i = 0; i < breateAnimationVectors2.size(); i++)
         {
             breateAnimationVectors2[i].x = breateAnimationVectors2[i].x - 0.009;
